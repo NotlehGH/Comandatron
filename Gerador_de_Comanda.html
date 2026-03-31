@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Comanda - Fratelli</title>
+<style>
+    /* Estilos da Tela (Visual do PC) */
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .cabecalho-topo { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+    .cabecalho-topo h2 { margin: 0; color: #333; }
+    .numero-pedido-tela { font-size: 24px; font-weight: bold; color: #d9534f; margin: 0; }
+    h3 { text-align: center; color: #333; margin-bottom: 5px; }
+    label { font-weight: bold; display: block; margin-top: 15px; color: #555; }
+    input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+    button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; margin-top: 25px; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #218838; }
+    .btn-secundario { background: #007bff; margin-top: 10px; }
+    .btn-secundario:hover { background: #0069d9; }
+    .btn-bebida { background: #17a2b8; margin-top: 10px; }
+    .btn-bebida:hover { background: #138496; }
+    .btn-limpar { background: #dc3545; margin-top: 10px; }
+    .btn-limpar:hover { background: #c82333; }
+    .btn-zerar { background: #dc3545; width: auto; padding: 8px 15px; font-size: 14px; margin-top: 0; }
+    .btn-relatorio { background: #007bff; width: auto; padding: 8px 15px; font-size: 14px; margin-top: 0; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
+    .btn-relatorio:hover { background: #0056b3; }
+    .botoes-historico { display: flex; }
+    
+    .sessao { border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-top: 15px; background-color: #fafafa; }
+    #listaItens { list-style-type: none; padding: 0; }
+    #listaItens li { background: #fff; border: 1px solid #ccc; padding: 10px; margin-top: 5px; border-radius: 4px; font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center;}
+    .descricao-item { width: 65%; }
+    .valor-item { width: 35%; text-align: right; font-weight: bold; display: flex; justify-content: flex-end; align-items: center; gap: 10px;}
+    .btn-remover { background: none; border: none; color: #dc3545; font-size: 18px; cursor: pointer; padding: 0; margin: 0; width: auto; }
+    .btn-remover:hover { background: none; color: #a71d2a; transform: scale(1.1); }
+    .valores-resumo { font-size: 18px; font-weight: bold; color: #d9534f; margin-top: 10px; text-align: right; }
+    #divTroco { display: none; background-color: #e9ecef; padding: 10px; border-radius: 5px; margin-top: 10px; border: 1px dashed #ccc; }
+    .historico-container { max-height: 200px; overflow-y: auto; background: #fff; border: 1px solid #ccc; border-radius: 4px; margin-top: 10px; padding: 5px; }
+    .item-historico { font-size: 13px; border-bottom: 1px solid #eee; padding: 8px 5px; display: flex; justify-content: space-between; }
+    .item-historico:last-child { border-bottom: none; }
+    .item-historico strong { color: #d9534f; }
+
+    /* =========================================
+       CLONE DO LAYOUT FRATELLI (IMPRESSORA 58mm)
+       ========================================= */
+    @media print {
+        @page { margin: 0; size: 58mm auto; }
+        
+        html, body { 
+            margin: 0; padding: 0; background: white; width: 58mm; height: max-content; 
+        }
+        
+        .no-print { display: none !important; }
+        
+        .print-area { 
+            display: block !important; 
+            width: 100%; 
+            padding: 2mm; 
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif !important; 
+            color: #000 !important; 
+            font-size: 15px !important; 
+            font-weight: bold !important; 
+            line-height: 1.3 !important;
+        }
+        
+        .center { text-align: center; width: 100%; }
+        .titulo-fratelli { font-size: 20px !important; font-weight: 900 !important; margin-bottom: 10px; text-align: center; letter-spacing: 1px; }
+        
+        .linhas-flex { display: flex; justify-content: space-between; align-items: flex-start; margin: 3px 0; }
+        .linhas-flex span:first-child { width: 70%; word-break: break-word; padding-right: 5px; }
+        .linhas-flex span:last-child { width: 30%; text-align: right; white-space: nowrap; }
+        
+        .separador-pontilhado { border-bottom: 2px dashed #000; margin: 10px 0; }
+        
+        .bloco-texto { margin-bottom: 8px; }
+        
+        .caixa-valores { border: 2px dashed #000; padding: 6px; margin: 10px 0; }
+        
+        .caixa-atencao { 
+            border: 2px dashed #000; 
+            padding: 6px; 
+            margin: 10px 0; 
+            text-align: center; 
+        }
+        .caixa-atencao div:first-child { font-size: 14px !important; }
+        .caixa-atencao div:last-child { font-size: 16px !important; font-weight: 900 !important; margin-top: 3px;}
+
+        .item-pedido { margin-bottom: 10px; }
+        .sub-item { margin-left: 10px; font-size: 14px !important; font-weight: normal !important; }
+        
+        .titulo-secao { margin-top: 10px; margin-bottom: 5px; font-weight: 900 !important; text-transform: uppercase; }
+        
+        .fim-comanda { margin-bottom: 15mm; } 
+    }
+    .print-area { display: none; }
+</style>
+</head>
+<body>
+
+<div class="container no-print">
+    <div class="cabecalho-topo">
+        <h2>Nova Comanda</h2>
+        <p class="numero-pedido-tela">Pedido #<span id="displayNumeroPedido">001</span></p>
+    </div>
+
+    <form id="comandaForm">
+        <div class="sessao">
+            <h3 style="margin-top: 0;">Dados do Cliente</h3>
+            <label for="nome">Nome do Cliente:</label>
+            <input type="text" id="nome" required placeholder="Ex: João Silva">
+
+            <label for="telefone">Telefone:</label>
+            <input type="tel" id="telefone" placeholder="(00) 00000-0000">
+
+            <label for="bairro">Bairro da Entrega:</label>
+            <select id="bairro" onchange="atualizarTaxaEntrega()"></select>
+
+            <label for="endereco">Rua, Número e Complemento:</label>
+            <textarea id="endereco" rows="2" placeholder="Ex: Rua XV de Novembro, 123 - Casa"></textarea>
+        </div>
+
+        <div class="sessao">
+            <h3>Montar Pizza</h3>
+            <label for="tamanho">Tamanho:</label>
+            <select id="tamanho" onchange="atualizarSabores()">
+                <option value="Grande (8 Fatias)">Grande (8 Fatias) - Até 2 sabores</option>
+                <option value="Broto (4 Fatias)">Broto (4 Fatias) - 1 sabor</option>
+            </select>
+
+            <label for="sabor1">Sabor 1:</label>
+            <select id="sabor1"></select>
+
+            <label for="sabor2">Sabor 2 (Opcional para Grande):</label>
+            <select id="sabor2"></select>
+
+            <label for="borda">Borda Recheada (Apenas Grande):</label>
+            <select id="borda"></select>
+
+            <label for="adicional">Adicional (Apenas Grande):</label>
+            <select id="adicional"></select>
+
+            <button type="button" class="btn-secundario" onclick="adicionarPizza()">+ Adicionar Pizza ao Pedido</button>
+        </div>
+
+        <div class="sessao">
+            <h3>Bebidas</h3>
+            <label for="bebida">Adicionar Bebida:</label>
+            <select id="bebida"></select>
+            <button type="button" class="btn-bebida" onclick="adicionarBebida()">+ Adicionar Bebida</button>
+        </div>
+
+        <div class="sessao" style="background-color: #e9ecef;">
+            <h3 style="margin-top: 0;">Itens do Pedido</h3>
+            <ul id="listaItens"></ul>
+            <div class="valores-resumo" id="subtotalTela">Subtotal Itens: R$ 0,00</div>
+        </div>
+
+        <label for="outrosItens">Observações do Pedido (Opcional):</label>
+        <textarea id="outrosItens" rows="2" placeholder="Ex: Sem cebola na calabresa..."></textarea>
+
+        <div class="sessao">
+            <label for="taxaEntrega">Taxa de Entrega (R$):</label>
+            <input type="number" id="taxaEntrega" step="0.50" value="0.00" oninput="calcularTotalFinal()">
+
+            <label for="valorTotal">Valor Total do Pedido (R$):</label>
+            <input type="number" id="valorTotal" step="0.01" required placeholder="Ex: 85.50">
+
+            <label for="pagamento">Forma de Pagamento:</label>
+            <select id="pagamento" onchange="atualizarCampoTroco()">
+                <option value="PIX">PIX</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Cartão de Débito">Cartão de Débito</option>
+            </select>
+
+            <div id="divTroco">
+                <label for="trocoPara" style="margin-top: 0;">Troco para R$ (Deixe em branco se não precisar):</label>
+                <input type="number" id="trocoPara" step="0.50" placeholder="Ex: 100.00">
+            </div>
+        </div>
+
+        <button type="button" onclick="gerarComanda()">🖨️ Gerar e Imprimir Comanda</button>
+        <button type="button" class="btn-limpar" onclick="limparFormulario()">🗑️ Limpar Formulário Atual</button>
+    </form>
+
+    <div class="sessao" style="border-color: #17a2b8;">
+        <div class="cabecalho-topo" style="margin-bottom: 5px; border: none; padding: 0;">
+            <h3 style="margin: 0; color: #17a2b8;">📋 Histórico do Dia</h3>
+            <div class="botoes-historico">
+                <button type="button" class="btn-relatorio" onclick="imprimirRelatorio()">🖨️ Relatório</button>
+                <button type="button" class="btn-zerar" onclick="zerarExpediente()">Encerrar Dia</button>
+            </div>
+        </div>
+        <div class="historico-container" id="containerHistorico"></div>
+    </div>
+</div>
+
+<div class="print-area" id="printArea"></div>
+
+<script>
+    const cardapio = {
+        "01. 2 QUEIJOS": { grande: 35.00, broto: 21.00 }, "02. BACON": { grande: 35.00, broto: 21.00 },
+        "03. CALABRESA": { grande: 35.00, broto: 21.00 }, "04. CALABRESA C/ CHEDDAR": { grande: 35.00, broto: 21.00 },
+        "05. CATUBRESA": { grande: 35.00, broto: 21.00 }, "06. FRANGO": { grande: 35.00, broto: 21.00 },
+        "07. FRANGO C/ CATUPIRY": { grande: 35.00, broto: 21.00 }, "08. FRANGO C/ CHEDDAR": { grande: 35.00, broto: 21.00 },
+        "09. LOMBO": { grande: 35.00, broto: 21.00 }, "10. MILHO": { grande: 35.00, broto: 21.00 },
+        "11. MUÇARELA": { grande: 35.00, broto: 21.00 }, "12. NAPOLITANA": { grande: 35.00, broto: 21.00 },
+        "13. PALMITO": { grande: 35.00, broto: 21.00 }, "14. 3 QUEIJOS": { grande: 37.00, broto: 23.00 },
+        "15. 4 QUEIJOS": { grande: 37.00, broto: 23.00 }, "16. AMERICANA": { grande: 37.00, broto: 23.00 },
+        "17. BACON C/ CATUPIRY": { grande: 37.00, broto: 23.00 }, "18. BACON C/ CHEDDAR": { grande: 37.00, broto: 23.00 },
+        "19. BACON C/ MILHO": { grande: 37.00, broto: 23.00 }, "20. BRASILEIRA": { grande: 37.00, broto: 23.00 },
+        "21. CALABRESA ACEBOLADA": { grande: 37.00, broto: 23.00 }, "22. CALABRESA CROCANTE": { grande: 37.00, broto: 23.00 },
+        "23. CROCANTE": { grande: 37.00, broto: 23.00 }, "24. ESCAROLA C/ BACON": { grande: 37.00, broto: 23.00 },
+        "25. FRAMPALHA": { grande: 37.00, broto: 23.00 }, "26. FRANGALHO": { grande: 37.00, broto: 23.00 },
+        "27. FRANGO C/ MILHO": { grande: 37.00, broto: 23.00 }, "28. GRACIOSA": { grande: 37.00, broto: 23.00 },
+        "29. LOMBO ACEBOLADO": { grande: 37.00, broto: 23.00 }, "30. LOMBO C/ CATUPIRY": { grande: 37.00, broto: 23.00 },
+        "31. LOMBO C/ CHEDDAR": { grande: 37.00, broto: 23.00 }, "32. MARGUERITA": { grande: 37.00, broto: 23.00 },
+        "33. MODA DA CASA": { grande: 37.00, broto: 23.00 }, "34. PAULISTA": { grande: 37.00, broto: 23.00 },
+        "35. PIZZAIOLO": { grande: 37.00, broto: 23.00 }, "36. PORTUGUESA": { grande: 37.00, broto: 23.00 },
+        "37. ROMANA": { grande: 37.00, broto: 23.00 }, "38. VEGETARIANA": { grande: 37.00, broto: 23.00 },
+        "39. 4 ESTAÇÕES": { grande: 44.00, broto: 26.00 }, "40. 5 QUEIJOS": { grande: 44.00, broto: 26.00 },
+        "41. 6 QUEIJOS": { grande: 44.00, broto: 26.00 }, "42. 7 QUEIJOS": { grande: 44.00, broto: 26.00 },
+        "43. ANTONINHO": { grande: 44.00, broto: 26.00 }, "44. BACON AMERICANO": { grande: 44.00, broto: 26.00 },
+        "45. BACON COM BARBECUE": { grande: 44.00, broto: 26.00 }, "46. BAIANA": { grande: 44.00, broto: 26.00 },
+        "47. BOLONHESA": { grande: 44.00, broto: 26.00 }, "48. BRÓCOLIS COM BACON": { grande: 44.00, broto: 26.00 },
+        "49. CAIPIRA": { grande: 44.00, broto: 26.00 }, "50. CALABRESA COM BARBECUE": { grande: 44.00, broto: 26.00 },
+        "51. CANADENSE": { grande: 44.00, broto: 26.00 }, "52. CARBONARA": { grande: 44.00, broto: 26.00 },
+        "53. CATUFRANGO": { grande: 44.00, broto: 26.00 }, "54. CEARENSE": { grande: 44.00, broto: 26.00 },
+        "55. ESTELAR": { grande: 44.00, broto: 26.00 }, "57. ESTROGONOFE DE FRANGO": { grande: 44.00, broto: 26.00 },
+        "58. FRANCESA": { grande: 44.00, broto: 26.00 }, "59. FRANGO COM BARBECUE": { grande: 44.00, broto: 26.00 },
+        "60. GORGONZOLA": { grande: 44.00, broto: 26.00 }, "61. HUMITA": { grande: 44.00, broto: 26.00 },
+        "62. IMPERIAL": { grande: 44.00, broto: 26.00 }, "63. LOMBO COM BARBECUE": { grande: 44.00, broto: 26.00 },
+        "64. MEXICANA": { grande: 44.00, broto: 26.00 }, "65. PARMEGIANA": { grande: 44.00, broto: 26.00 },
+        "66. ROMANESCA": { grande: 44.00, broto: 26.00 }, "67. SICILIANA": { grande: 44.00, broto: 26.00 },
+        "68. SUPER CROCANTE": { grande: 44.00, broto: 26.00 }, "69. SUPREMA": { grande: 44.00, broto: 26.00 },
+        "70. TOSCANA": { grande: 44.00, broto: 26.00 }, "71. ALPINO": { grande: 39.00, broto: 22.00 },
+        "72. BANANA C/ CANELA": { grande: 39.00, broto: 22.00 }, "73. BANANA CROCANTE": { grande: 39.00, broto: 22.00 },
+        "74. BANANA NEVADA": { grande: 39.00, broto: 22.00 }, "75. BANANA NEVADA CROCANTE": { grande: 39.00, broto: 22.00 },
+        "76. BANOFFE": { grande: 39.00, broto: 22.00 }, "77. BEIJINHO": { grande: 36.00, broto: 22.00 },
+        "78. BRIGADEIRO": { grande: 36.00, broto: 22.00 }, "79. CHARGE": { grande: 36.00, broto: 22.00 },
+        "80. CHARGE BRANCO": { grande: 36.00, broto: 22.00 }, "81. CHOCOLATE AO LEITE": { grande: 36.00, broto: 22.00 },
+        "82. CHOCOLATE BRANCO": { grande: 36.00, broto: 22.00 }, "83. CHOCOLATE PRETO": { grande: 36.00, broto: 22.00 },
+        "84. CONFETE C/ CHOCOLATE BRANCO": { grande: 39.00, broto: 22.00 }, "85. CONFETE / CHOCOLATE PRETO": { grande: 39.00, broto: 22.00 },
+        "86. DIAMANTE NEGRO": { grande: 39.00, broto: 22.00 }, "87. DOCE DE LEITE": { grande: 39.00, broto: 22.00 },
+        "88. DOIS AMORES": { grande: 39.00, broto: 22.00 }, "89. FLOCOS": { grande: 39.00, broto: 22.00 },
+        "90. LIMÃO TRUFADO": { grande: 39.00, broto: 22.00 }, "91. LIMÃO": { grande: 39.00, broto: 22.00 },
+        "92. MORANGO": { grande: 39.00, broto: 22.00 }, "93. MORANGUETE": { grande: 39.00, broto: 22.00 },
+        "94. NINHO": { grande: 41.00, broto: 22.00 }, "95. NINHO TRUFADO": { grande: 41.00, broto: 22.00 },
+        "96. PRESTÍGIO": { grande: 39.00, broto: 22.00 }, "97. TRUFADO": { grande: 41.00, broto: 22.00 }
+    };
+
+    const listaBordas = { "Sem borda": 0.00, "Borda Catupiry": 5.00, "Borda Cheddar": 5.00, "Borda Chocolate Preto": 8.00, "Borda Chocolate Branco": 8.00 };
+    const listaAdicionais = { "Sem adicional": 0.00, "Mussarela": 7.00, "Bacon": 5.00, "Calabresa": 5.00, "Frango": 5.00, "Lombo": 5.00, "Palmito": 4.00, "Presunto": 5.00, "Catupiry": 3.00, "Cheddar": 3.00, "Tomate": 3.00, "Cebola": 3.00, "Ovos": 3.00, "Milho": 3.00, "Azeitona": 3.00, "Batata Palha": 3.00 };
+    const listaBebidas = { "Cini Sabores 2L": 8.00, "Sukita 2L": 12.00, "Coca-Cola 2L": 15.00, "Guaraná Antártica 2,25L": 15.00 };
+
+    const listaBairros = {
+        "Retirada no Balcão": 0.00, "BARIGUI": 5.00, "BATEL": 4.00, "CAIXA DÁGUA": 4.00, "CAMPO DOS CAVALOS": 6.00,
+        "CENTRO": 5.00, "GRACIOSA DE BAIXO": 5.00, "GRACIOSA DE CIMA": 5.00, "GUAPÊ": 4.00, "ITAPEMA DE BAIXO": 6.00,
+        "JARDIM CAPELISTA": 5.00, "JARDIM MARIA LUIZA": 5.00, "JARDIM RESIDENCIAL II": 5.00, "KM4": 5.00,
+        "KM4 (PASSANDO JOÃO DO OURO)": 7.00, "KM5": 7.00, "MALVINAS": 4.00, "MATARAZZO": 6.00, "MORRO DA CRUZ": 4.00,
+        "MORRO DO SALGADO": 5.00, "PENHA": 5.00, "PONTA DA PITA": 6.00, "PORTINHO": 5.00, "PRAIA DOS POLACOS": 6.00,
+        "SAIVA (PASSANDO A CHACARA DO PAGUE MENOS)": 5.00, "SAIVÁ": 4.00, "SÃO JOÃOZINHO FELIZ": 7.00,
+        "TUCUNDUVA": 4.00, "TUCUNDUVA DE BAIXO": 4.00, "TUCUNDUVA DE CIMA": 4.00, "Outro Bairro (Digitar valor)": 0.00
+    };
+
+    let carrinhoItens = [];
+    let subtotalItens = 0;
+    
+    let numeroPedidoAtual = parseInt(localStorage.getItem('numeroPedidoPizzaria')) || 1;
+    let historicoDiario = JSON.parse(localStorage.getItem('historicoPizzaria')) || [];
+
+    function inicializar() {
+        const selectSabor1 = document.getElementById('sabor1');
+        const selectSabor2 = document.getElementById('sabor2');
+        const selectBorda = document.getElementById('borda');
+        const selectAdicional = document.getElementById('adicional');
+        const selectBebida = document.getElementById('bebida');
+        const selectBairro = document.getElementById('bairro');
+
+        selectSabor1.innerHTML = ""; selectSabor2.innerHTML = '<option value="Nenhum">Nenhum (Pizza inteira do Sabor 1)</option>';
+        selectBorda.innerHTML = ""; selectAdicional.innerHTML = ""; selectBebida.innerHTML = "";
+        selectBairro.innerHTML = '<option value="">Selecione o Bairro...</option>';
+
+        Object.keys(listaBairros).forEach(bairro => {
+            let precoFormatado = listaBairros[bairro] > 0 ? ` (+ R$ ${listaBairros[bairro].toFixed(2).replace('.',',')})` : '';
+            if(bairro === "Retirada no Balcão") precoFormatado = " (Grátis)";
+            selectBairro.add(new Option(bairro + precoFormatado, bairro));
+        });
+
+        Object.keys(cardapio).forEach(sabor => {
+            selectSabor1.add(new Option(sabor, sabor)); selectSabor2.add(new Option(sabor, sabor));
+        });
+
+        Object.keys(listaBordas).forEach(borda => {
+            let p = listaBordas[borda] > 0 ? ` (+ R$ ${listaBordas[borda].toFixed(2).replace('.',',')})` : '';
+            selectBorda.add(new Option(borda + p, borda));
+        });
+
+        Object.keys(listaAdicionais).forEach(adc => {
+            let p = listaAdicionais[adc] > 0 ? ` (+ R$ ${listaAdicionais[adc].toFixed(2).replace('.',',')})` : '';
+            selectAdicional.add(new Option(adc + p, adc));
+        });
+
+        Object.keys(listaBebidas).forEach(bebida => {
+            selectBebida.add(new Option(`${bebida} - R$ ${listaBebidas[bebida].toFixed(2).replace('.',',')}`, bebida));
+        });
+
+        atualizarSabores();
+        atualizarCampoTroco();
+        document.getElementById('displayNumeroPedido').innerText = numeroPedidoAtual.toString().padStart(4, '0');
+        renderizarHistorico();
+    }
+    window.onload = inicializar;
+
+    function atualizarTaxaEntrega() {
+        const bairroSelecionado = document.getElementById('bairro').value;
+        if (bairroSelecionado && listaBairros[bairroSelecionado] !== undefined) {
+            if (bairroSelecionado !== "Outro Bairro (Digitar valor)") {
+                document.getElementById('taxaEntrega').value = listaBairros[bairroSelecionado].toFixed(2);
+            }
+        } else {
+            document.getElementById('taxaEntrega').value = "0.00";
+        }
+        calcularTotalFinal();
+    }
+
+    function atualizarSabores() {
+        const tamanho = document.getElementById('tamanho').value;
+        if (tamanho.includes("Broto")) {
+            document.getElementById('sabor2').value = "Nenhum"; document.getElementById('sabor2').disabled = true;
+            document.getElementById('borda').value = "Sem borda"; document.getElementById('borda').disabled = true;
+            document.getElementById('adicional').value = "Sem adicional"; document.getElementById('adicional').disabled = true;
+        } else {
+            document.getElementById('sabor2').disabled = false; document.getElementById('borda').disabled = false; document.getElementById('adicional').disabled = false;
+        }
+    }
+
+    function atualizarCampoTroco() {
+        const pagamento = document.getElementById('pagamento').value;
+        document.getElementById('divTroco').style.display = (pagamento === "Dinheiro") ? "block" : "none";
+        if(pagamento !== "Dinheiro") document.getElementById('trocoPara').value = ""; 
+    }
+
+    function limparNomeSabor(sabor) {
+        if (sabor === "Nenhum") return sabor;
+        return sabor.includes('.') ? sabor.split('. ')[1] : sabor;
+    }
+
+    function adicionarPizza() {
+        const tamanho = document.getElementById('tamanho').value;
+        const sabor1 = document.getElementById('sabor1').value;
+        const sabor2 = document.getElementById('sabor2').value;
+        const borda = document.getElementById('borda').value;
+        const adic = document.getElementById('adicional').value;
+        
+        if (!sabor1 || !cardapio[sabor1]) return;
+
+        let preco = 0;
+        let strImpressora = "";
+        let strTela = "";
+
+        if (tamanho.includes("Broto")) {
+            preco = cardapio[sabor1].broto;
+            strImpressora = `1 PIZZA BROTO (4 FATIAS)<br><div class="sub-item">1 ${sabor1}</div>`;
+            strTela = `1x Broto - ${sabor1}`;
+        } else {
+            if (sabor2 === "Nenhum") {
+                preco = cardapio[sabor1].grande;
+                strImpressora = `1 PIZZA GRANDE (8 FATIAS)<br><div class="sub-item">1 ${sabor1}</div>`;
+                strTela = `1x Grande - ${sabor1}`;
+            } else {
+                preco = Math.max(cardapio[sabor1].grande, cardapio[sabor2].grande);
+                strImpressora = `1 PIZZA GRANDE (8 FATIAS)<br><div class="sub-item">1/2 ${sabor1}<br>1/2 ${sabor2}</div>`;
+                strTela = `1x Grande - 1/2 ${sabor1} e 1/2 ${sabor2}`;
+            }
+
+            if (borda !== "Sem borda") {
+                preco += listaBordas[borda];
+                strImpressora += `<div class="sub-item">+ ${borda}</div>`;
+                strTela += `<br><small>+ ${borda}</small>`;
+            }
+            if (adic !== "Sem adicional") {
+                preco += listaAdicionais[adic];
+                strImpressora += `<div class="sub-item">+ Adic: ${adic}</div>`;
+                strTela += `<br><small>+ Adic: ${adic}</small>`;
+            }
+        }
+
+        carrinhoItens.push({ descTela: strTela, descImpressora: strImpressora, valor: preco });
+        subtotalItens += preco;
+        renderizarCarrinho(); calcularTotalFinal();
+        
+        document.getElementById('sabor2').value = "Nenhum"; document.getElementById('borda').value = "Sem borda"; document.getElementById('adicional').value = "Sem adicional";
+    }
+
+    function adicionarBebida() {
+        const bebida = document.getElementById('bebida').value;
+        if (!bebida) return;
+        const preco = listaBebidas[bebida];
+        carrinhoItens.push({ descTela: `1x ${bebida}`, descImpressora: `1 ${bebida}`, valor: preco });
+        subtotalItens += preco;
+        renderizarCarrinho(); calcularTotalFinal();
+    }
+
+    function removerItem(i) {
+        subtotalItens -= carrinhoItens[i].valor; carrinhoItens.splice(i, 1); 
+        renderizarCarrinho(); calcularTotalFinal();
+    }
+
+    function renderizarCarrinho() {
+        const lista = document.getElementById('listaItens'); lista.innerHTML = "";
+        carrinhoItens.forEach((item, i) => {
+            lista.innerHTML += `<li><div class="descricao-item">${item.descTela}</div><div class="valor-item">R$ ${item.valor.toFixed(2).replace('.', ',')} <button type="button" class="btn-remover" onclick="removerItem(${i})">🗑️</button></div></li>`;
+        });
+        document.getElementById('subtotalTela').innerText = `Subtotal Itens: R$ ${subtotalItens.toFixed(2).replace('.', ',')}`;
+    }
+
+    function calcularTotalFinal() {
+        const taxa = parseFloat(document.getElementById('taxaEntrega').value) || 0;
+        document.getElementById('valorTotal').value = (subtotalItens + taxa).toFixed(2);
+    }
+
+    // IMPRIMIR COMANDA (SALVANDO TAXA SEPARADA)
+    function gerarComanda() {
+        const nome = document.getElementById('nome').value;
+        const telefone = document.getElementById('telefone').value || 'Não informado';
+        const bairro = document.getElementById('bairro').value;
+        const endereco = document.getElementById('endereco').value;
+        const obs = document.getElementById('outrosItens').value;
+        const taxa = parseFloat(document.getElementById('taxaEntrega').value) || 0;
+        const total = parseFloat(document.getElementById('valorTotal').value);
+        const pagamento = document.getElementById('pagamento').value;
+        const trocoPara = parseFloat(document.getElementById('trocoPara').value);
+
+        if(!nome || isNaN(total) || carrinhoItens.length === 0) { alert("Preencha o Nome e adicione pelo menos um item."); return; }
+
+        let agora = new Date();
+        let dataAtualStr = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        agora.setHours(agora.getHours() + 1);
+        let entregaAteStr = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+
+        let endFormatado = (bairro === "Retirada no Balcão") ? "RETIRADA NO BALCÃO" : `${endereco || ''} - ${bairro && bairro !== "Outro Bairro (Digitar valor)" ? bairro : ''} - Antonina-PR`;
+
+        let htmlItens = carrinhoItens.map(item => `
+            <div class="item-pedido">
+                <div class="linhas-flex">
+                    <span>${item.descImpressora}</span>
+                    <span>R$ ${item.valor.toFixed(2).replace('.', ',')}</span>
+                </div>
+            </div>
+        `).join('');
+
+        const numFormatado = numeroPedidoAtual.toString().padStart(4, '0');
+        const numFormatadoCurto = numeroPedidoAtual.toString();
+
+        let htmlTroco = '';
+        if (pagamento === "Dinheiro") {
+            if (!isNaN(trocoPara) && trocoPara > total) {
+                htmlTroco = `
+                    <div class="caixa-valores">
+                        <div class="linhas-flex"><span>Dinheiro:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span></div>
+                        <div class="linhas-flex"><span>Levar troco para:</span><span>R$ ${trocoPara.toFixed(2).replace('.', ',')}</span></div>
+                        <div class="linhas-flex" style="font-size: 16px; margin-top: 5px;"><span>Valor do troco:</span><span>R$ ${(trocoPara - total).toFixed(2).replace('.', ',')}</span></div>
+                    </div>
+                `;
+            } else {
+                htmlTroco = `<div class="caixa-valores"><div class="center">Dinheiro (Sem troco)</div></div>`;
+            }
+        } else {
+            htmlTroco = `
+                <div class="caixa-valores">
+                    <div class="linhas-flex"><span>${pagamento}:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span></div>
+                </div>
+            `;
+        }
+
+        const comandaHTML = `
+            <div class="comanda">
+                <div class="titulo-fratelli">FRATELLI DELIVERY</div>
+                
+                <div class="linhas-flex"><span>Pedido: #${numFormatado}</span><span>Entrega: #${numFormatadoCurto}</span></div>
+                <div class="bloco-texto">Empresa: FRATELLI</div>
+                
+                <div class="bloco-texto">Data: ${dataAtualStr}</div>
+                <div class="bloco-texto">Entregar ate: ${entregaAteStr}</div>
+                
+                <div class="bloco-texto" style="margin-top: 10px;">Cliente: ${nome}</div>
+                <div class="bloco-texto">Telefone(s): ${telefone}</div>
+                
+                <div class="separador-pontilhado"></div>
+                
+                <div class="bloco-texto">ENDERECO DE ENTREGA:<br>${endFormatado}</div>
+                
+                <div class="separador-pontilhado"></div>
+                
+                <div class="titulo-secao">ITENS DO PEDIDO</div>
+                <div class="linhas-flex" style="margin-bottom: 8px;"><span>Qtd Item</span><span>Preco</span></div>
+                
+                ${htmlItens}
+                
+                ${obs ? `<div class="bloco-texto" style="margin-top:10px;">OBS: -<br>${obs}</div>` : '<div class="bloco-texto" style="margin-top:10px;">OBS: -</div>'}
+                
+                <div class="caixa-valores">
+                    <div class="linhas-flex"><span>Subtotal:</span><span>R$ ${subtotalItens.toFixed(2).replace('.', ',')}</span></div>
+                    <div class="linhas-flex"><span>Taxa de Entrega:</span><span>R$ ${taxa.toFixed(2).replace('.', ',')}</span></div>
+                </div>
+                
+                <div class="caixa-valores" style="font-size: 18px !important; font-weight: 900 !important;">
+                    <div class="linhas-flex"><span>Cobrar do Cliente:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span></div>
+                </div>
+                
+                <div class="caixa-atencao">
+                    <div>**ATENCAO ENTREGADOR**</div>
+                    <div>*COBRAR DO CLIENTE R$ ${total.toFixed(2).replace('.', ',')}*</div>
+                </div>
+                
+                <div class="titulo-secao" style="margin-top: 15px;">FORMA DE PAGAMENTO</div>
+                ${htmlTroco}
+                
+                <div class="fim-comanda"></div>
+            </div>
+        `;
+
+        document.getElementById('printArea').innerHTML = comandaHTML;
+        
+        // SALVA HISTÓRICO COM A TAXA DE ENTREGA SEPARADA
+        const novoPedidoHistorico = {
+            numero: numFormatado,
+            nome: nome,
+            valor: total.toFixed(2),
+            taxa: taxa.toFixed(2), // NOVO CAMPO: Salva a taxa para o motoboy
+            hora: dataAtualStr.split(' ')[1]
+        };
+        historicoDiario.unshift(novoPedidoHistorico); 
+        localStorage.setItem('historicoPizzaria', JSON.stringify(historicoDiario));
+
+        numeroPedidoAtual++;
+        localStorage.setItem('numeroPedidoPizzaria', numeroPedidoAtual);
+
+        document.getElementById('displayNumeroPedido').innerText = numeroPedidoAtual.toString().padStart(4, '0');
+        renderizarHistorico();
+
+        window.print();
+
+        setTimeout(() => { limparFormulario(); }, 1000);
+    }
+
+    // IMPRIMIR RELATÓRIO (COM ACERTO DO MOTOBOY)
+    function imprimirRelatorio() {
+        if (historicoDiario.length === 0) {
+            alert("Nenhum pedido registrado hoje para imprimir no relatório.");
+            return;
+        }
+
+        let totalVendas = 0;
+        let totalTaxas = 0; // Somador das taxas do motoboy
+        let htmlPedidos = '';
+        let historicoCronologico = [...historicoDiario].reverse();
+
+        historicoCronologico.forEach(pedido => {
+            let valorNum = parseFloat(pedido.valor.replace(',', '.'));
+            let taxaNum = pedido.taxa ? parseFloat(pedido.taxa.replace(',', '.')) : 0; // Puxa a taxa salva
+
+            totalVendas += valorNum;
+            totalTaxas += taxaNum;
+
+            htmlPedidos += `
+                <div class="linhas-flex" style="font-size: 14px !important; margin-bottom: 3px;">
+                    <span>#${pedido.numero} ${pedido.nome.substring(0, 12)}</span>
+                    <span>R$ ${pedido.valor.replace('.', ',')}</span>
+                </div>
+            `;
+        });
+
+        let totalLoja = totalVendas - totalTaxas; // Valor que fica para a pizzaria
+        let dataStr = new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+        const relatorioHTML = `
+            <div class="comanda">
+                <div class="titulo-fratelli">FECHAMENTO CAIXA</div>
+                <div class="bloco-texto center">Data: ${dataStr}</div>
+                <div class="separador-pontilhado"></div>
+                
+                <div class="titulo-secao">RESUMO DE PEDIDOS</div>
+                <div class="linhas-flex" style="margin-bottom: 8px;"><span>Pedido/Cliente</span><span>Valor Total</span></div>
+                ${htmlPedidos}
+                
+                <div class="separador-pontilhado"></div>
+                
+                <div class="caixa-valores" style="font-size: 16px !important; font-weight: 900 !important;">
+                    <div class="linhas-flex"><span>Qtd de Pedidos:</span><span>${historicoDiario.length}</span></div>
+                    <div class="separador-pontilhado" style="margin: 5px 0;"></div>
+                    <div class="linhas-flex"><span>Total Produtos:</span><span>R$ ${totalLoja.toFixed(2).replace('.', ',')}</span></div>
+                    <div class="linhas-flex"><span>Taxas Motoboy:</span><span>R$ ${totalTaxas.toFixed(2).replace('.', ',')}</span></div>
+                    <div class="separador-pontilhado" style="margin: 5px 0;"></div>
+                    <div class="linhas-flex" style="margin-top: 5px;"><span>TOTAL CAIXA:</span><span>R$ ${totalVendas.toFixed(2).replace('.', ',')}</span></div>
+                </div>
+                
+                <div class="center" style="margin-top: 15px;">Fim do Relatorio</div>
+                <div class="fim-comanda"></div>
+            </div>
+        `;
+
+        document.getElementById('printArea').innerHTML = relatorioHTML;
+        window.print();
+    }
+
+    function limparFormulario() {
+        document.getElementById('comandaForm').reset(); carrinhoItens = []; subtotalItens = 0;
+        renderizarCarrinho(); atualizarSabores(); atualizarCampoTroco(); document.getElementById('bairro').selectedIndex = 0;
+    }
+
+    function renderizarHistorico() {
+        const container = document.getElementById('containerHistorico');
+        if (historicoDiario.length === 0) { container.innerHTML = '<div style="text-align: center; color: #888; padding: 10px;">Nenhum pedido registrado hoje.</div>'; return; }
+        container.innerHTML = "";
+        historicoDiario.forEach(pedido => {
+            container.innerHTML += `<div class="item-historico"><span><strong>#${pedido.numero}</strong> - ${pedido.nome} <span style="color:#888; font-size:11px;">(${pedido.hora})</span></span><span style="font-weight: bold;">R$ ${pedido.valor.replace('.', ',')}</span></div>`;
+        });
+    }
+
+    function zerarExpediente() {
+        if(confirm("Encerrar o dia e voltar pedido para #0001? (Certifique-se de imprimir o relatório antes!)")) {
+            numeroPedidoAtual = 1; historicoDiario = [];
+            localStorage.setItem('numeroPedidoPizzaria', 1); localStorage.setItem('historicoPizzaria', JSON.stringify([]));
+            document.getElementById('displayNumeroPedido').innerText = "0001"; renderizarHistorico();
+            alert("Caixa zerado com sucesso!");
+        }
+    }
+</script>
+
+</body>
+</html>
