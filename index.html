@@ -3,31 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema de Comanda - Fratelli</title>
+<title>Comandatron - Sistema de Comanda</title>
+<link rel="icon" href="comandatron-icone.png" type="image/png">
 <style>
     /* Estilos da Tela (Visual do PC) */
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; padding-bottom: 60px; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); position: relative; }
+    
     .cabecalho-topo { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
     .cabecalho-topo h2 { margin: 0; color: #333; }
     .numero-pedido-tela { font-size: 24px; font-weight: bold; color: #d9534f; margin: 0; }
+    
     h3 { text-align: center; color: #333; margin-bottom: 5px; }
     label { font-weight: bold; display: block; margin-top: 15px; color: #555; }
     input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+    
     button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; margin-top: 25px; cursor: pointer; transition: 0.2s; }
     button:hover { background: #218838; }
+    
+    .btn-config { background: #343a40; width: auto; padding: 8px 15px; font-size: 14px; margin-top: 0; }
+    .btn-config:hover { background: #23272b; }
     .btn-secundario { background: #007bff; margin-top: 10px; }
     .btn-secundario:hover { background: #0069d9; }
     .btn-bebida { background: #17a2b8; margin-top: 10px; }
     .btn-bebida:hover { background: #138496; }
+    .btn-outro { background: #fd7e14; margin-top: 10px; }
+    .btn-outro:hover { background: #e26b0b; }
     .btn-limpar { background: #dc3545; margin-top: 10px; }
     .btn-limpar:hover { background: #c82333; }
     .btn-zerar { background: #dc3545; width: auto; padding: 8px 15px; font-size: 14px; margin-top: 0; }
-    .btn-relatorio { background: #007bff; width: auto; padding: 8px 15px; font-size: 14px; margin-top: 0; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
+    .btn-relatorio { background: #007bff; width: auto; padding: 8px 15px; font-size: 14px; margin-top: 0; margin-right: 5px; }
     .btn-relatorio:hover { background: #0056b3; }
-    .botoes-historico { display: flex; }
     
+    .btn-reimprimir { background: #6c757d; width: auto; padding: 4px 8px; font-size: 12px; margin: 0; display: inline-block; border-radius: 3px; }
+    .btn-reimprimir:hover { background: #5a6268; }
+    
+    .btn-add-adic { background: #17a2b8; color: white; border: none; border-radius: 4px; padding: 10px; font-weight: bold; cursor: pointer; width: auto; margin-top: 5px; height: 42px; display: flex; align-items: center; justify-content: center; }
+    .btn-add-adic:hover { background: #138496; }
+    
+    .botoes-historico { display: flex; }
     .sessao { border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-top: 15px; background-color: #fafafa; }
+    
     #listaItens { list-style-type: none; padding: 0; }
     #listaItens li { background: #fff; border: 1px solid #ccc; padding: 10px; margin-top: 5px; border-radius: 4px; font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center;}
     .descricao-item { width: 65%; }
@@ -35,63 +51,116 @@
     .btn-remover { background: none; border: none; color: #dc3545; font-size: 18px; cursor: pointer; padding: 0; margin: 0; width: auto; }
     .btn-remover:hover { background: none; color: #a71d2a; transform: scale(1.1); }
     .valores-resumo { font-size: 18px; font-weight: bold; color: #d9534f; margin-top: 10px; text-align: right; }
+    
     #divTroco { display: none; background-color: #e9ecef; padding: 10px; border-radius: 5px; margin-top: 10px; border: 1px dashed #ccc; }
+    
     .historico-container { max-height: 200px; overflow-y: auto; background: #fff; border: 1px solid #ccc; border-radius: 4px; margin-top: 10px; padding: 5px; }
-    .item-historico { font-size: 13px; border-bottom: 1px solid #eee; padding: 8px 5px; display: flex; justify-content: space-between; }
+    .item-historico { font-size: 13px; border-bottom: 1px solid #eee; padding: 8px 5px; display: flex; justify-content: space-between; align-items: center;}
     .item-historico:last-child { border-bottom: none; }
     .item-historico strong { color: #d9534f; }
+    .info-historico { display: flex; align-items: center; gap: 10px; }
+
+    /* Estilos do Modal de Preços */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); }
+    .modal-content { background-color: #fff; margin: 2% auto; padding: 20px; border-radius: 8px; width: 95%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    
+    .grid-precos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .grid-precos div { width: calc(50% - 5px); }
+    .grid-precos label { margin-top: 5px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+    .grid-precos input { margin-top: 2px; padding: 8px; font-size: 14px; }
+    
+    details { background: #fdfdfd; border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin-bottom: 10px; }
+    summary { font-weight: bold; cursor: pointer; font-size: 16px; padding: 5px 0; outline: none; color: #333;}
+    summary:hover { color: #007bff; }
+    
+    .btn-salvar-modal { margin-top: 15px; background: #28a745; }
+    .btn-cancelar-modal { margin-top: 15px; background: #6c757d; }
 
     /* =========================================
-       CLONE DO LAYOUT FRATELLI (IMPRESSORA 58mm)
+       LOGO E MARCA D'ÁGUA (CANTO INFERIOR DIREITO)
+       ========================================= */
+    .container-assinatura {
+        position: fixed;
+        bottom: 15px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        z-index: 9999;
+        pointer-events: none; /* Para não atrapalhar os cliques na tela */
+        opacity: 0.85;
+    }
+    
+    .logo-comandatron {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 5px;
+    }
+    
+    .logo-comandatron svg {
+        width: 38px;
+        height: auto;
+    }
+    
+    .logo-comandatron .texto-logo {
+        font-family: 'Arial Black', Impact, sans-serif;
+        font-size: 22px;
+        color: #1a365d;
+        letter-spacing: -0.5px;
+        margin-top: 5px;
+    }
+    
+    .logo-comandatron .texto-logo span {
+        font-weight: 300;
+        font-family: Arial, sans-serif;
+    }
+    
+    .marca-dagua {
+        font-size: 11px;
+        color: #666;
+        font-family: Arial, sans-serif;
+        font-style: italic;
+    }
+
+    /* =========================================
+       LAYOUT DE IMPRESSÃO EM CAIXAS (58mm)
        ========================================= */
     @media print {
         @page { margin: 0; size: 58mm auto; }
-        
-        html, body { 
-            margin: 0; padding: 0; background: white; width: 58mm; height: max-content; 
-        }
-        
+        html, body { margin: 0; padding: 0; background: white; width: 58mm; height: max-content; }
         .no-print { display: none !important; }
         
         .print-area { 
-            display: block !important; 
-            width: 100%; 
-            padding: 2mm; 
-            box-sizing: border-box;
-            font-family: Arial, Helvetica, sans-serif !important; 
-            color: #000 !important; 
-            font-size: 15px !important; 
-            font-weight: bold !important; 
-            line-height: 1.3 !important;
+            display: block !important; width: 100%; padding: 2mm; box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif !important; color: #000 !important; 
+            font-size: 13px !important; font-weight: bold !important; line-height: 1.2 !important;
         }
         
         .center { text-align: center; width: 100%; }
-        .titulo-fratelli { font-size: 20px !important; font-weight: 900 !important; margin-bottom: 10px; text-align: center; letter-spacing: 1px; }
+        .titulo-fratelli { font-size: 18px !important; font-weight: 900 !important; margin-bottom: 2px; text-align: center; line-height: 1.1 !important; }
+        .cnpj-fratelli { font-size: 11px !important; text-align: center; margin-bottom: 8px; }
         
-        .linhas-flex { display: flex; justify-content: space-between; align-items: flex-start; margin: 3px 0; }
-        .linhas-flex span:first-child { width: 70%; word-break: break-word; padding-right: 5px; }
-        .linhas-flex span:last-child { width: 30%; text-align: right; white-space: nowrap; }
+        .caixa-impressao { border: 2px solid #000; border-radius: 4px; padding: 4px; margin-bottom: 6px; box-sizing: border-box; width: 100%; overflow: hidden; }
         
-        .separador-pontilhado { border-bottom: 2px dashed #000; margin: 10px 0; }
-        
-        .bloco-texto { margin-bottom: 8px; }
-        
-        .caixa-valores { border: 2px dashed #000; padding: 6px; margin: 10px 0; }
-        
-        .caixa-atencao { 
-            border: 2px dashed #000; 
-            padding: 6px; 
-            margin: 10px 0; 
-            text-align: center; 
+        .titulo-caixa {
+            background-color: #000 !important; color: #fff !important; text-align: center; font-size: 13px !important; font-weight: 900 !important;
+            padding: 3px; margin: -4px -4px 4px -4px; border-radius: 2px 2px 0 0;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-        .caixa-atencao div:first-child { font-size: 14px !important; }
-        .caixa-atencao div:last-child { font-size: 16px !important; font-weight: 900 !important; margin-top: 3px;}
 
-        .item-pedido { margin-bottom: 10px; }
-        .sub-item { margin-left: 10px; font-size: 14px !important; font-weight: normal !important; }
+        .linhas-flex { display: flex; justify-content: space-between; align-items: flex-start; margin: 3px 0; width: 100%; }
+        .linhas-flex span:first-child { width: 68%; word-break: break-word; padding-right: 3px; }
+        .linhas-flex span:last-child { width: 32%; text-align: right; white-space: nowrap; font-size: 13px !important;}
         
-        .titulo-secao { margin-top: 10px; margin-bottom: 5px; font-weight: 900 !important; text-transform: uppercase; }
+        .bloco-texto { margin-bottom: 5px; word-wrap: break-word; width: 100%; }
         
+        .caixa-atencao { border: 2px dashed #000; padding: 5px; margin: 8px 0; text-align: center; box-sizing: border-box; width: 100%; }
+        .caixa-atencao div:first-child { font-size: 13px !important; }
+        .caixa-atencao div:last-child { font-size: 15px !important; font-weight: 900 !important; margin-top: 3px;}
+
+        .item-pedido { margin-bottom: 8px; width: 100%; }
+        .sub-item { margin-left: 8px; font-size: 12px !important; font-weight: normal !important; }
         .fim-comanda { margin-bottom: 15mm; } 
     }
     .print-area { display: none; }
@@ -99,10 +168,29 @@
 </head>
 <body>
 
+<div class="container-assinatura no-print">
+    <div class="logo-comandatron">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1a365d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a4 4 0 1 1 0-8h1"/>
+            <circle cx="14" cy="8" r="1.5" fill="#1a365d"/>
+            <circle cx="10" cy="12" r="1.5" fill="#1a365d"/>
+            <circle cx="14" cy="16" r="1.5" fill="#1a365d"/>
+            <line x1="14" y1="8" x2="10" y2="12"/>
+            <line x1="10" y1="12" x2="14" y2="16"/>
+        </svg>
+        <div class="texto-logo">COMANDA<span>TRON</span></div>
+    </div>
+    <div class="marca-dagua">Idealizado e desenvolvido por Helton Velloso de Souza</div>
+</div>
+
 <div class="container no-print">
     <div class="cabecalho-topo">
-        <h2>Nova Comanda</h2>
-        <p class="numero-pedido-tela">Pedido #<span id="displayNumeroPedido">001</span></p>
+        <div>
+            <h2>Comandatron</h2>
+            <p style="margin: -5px 0 10px 0; font-size: 14px; color: #666; font-weight: normal;">Nova Comanda</p>
+            <p class="numero-pedido-tela">Pedido #<span id="displayNumeroPedido">001</span></p>
+        </div>
+        <button type="button" class="btn-config" onclick="abrirConfiguracoes()">⚙️ Configurar Preços</button>
     </div>
 
     <form id="comandaForm">
@@ -138,8 +226,12 @@
             <label for="borda">Borda Recheada (Apenas Grande):</label>
             <select id="borda"></select>
 
-            <label for="adicional">Adicional (Apenas Grande):</label>
-            <select id="adicional"></select>
+            <label for="adicional">Adicionais Extras (Apenas Grande):</label>
+            <div style="display: flex; gap: 10px;">
+                <select id="adicional" style="width: 80%;"></select>
+                <button type="button" id="btnAddAdic" class="btn-add-adic" onclick="incluirAdicionalTemporario()" style="width: 20%;" title="Incluir mais um adicional">+</button>
+            </div>
+            <div id="boxAdicionaisAtuais"></div>
 
             <button type="button" class="btn-secundario" onclick="adicionarPizza()">+ Adicionar Pizza ao Pedido</button>
         </div>
@@ -149,6 +241,17 @@
             <label for="bebida">Adicionar Bebida:</label>
             <select id="bebida"></select>
             <button type="button" class="btn-bebida" onclick="adicionarBebida()">+ Adicionar Bebida</button>
+        </div>
+
+        <div class="sessao">
+            <h3>Outros / Item Avulso</h3>
+            <label for="descOutro" style="margin-top: 5px;">Descrição do Produto/Taxa:</label>
+            <input type="text" id="descOutro" placeholder="Ex: Porção de Fritas, Embalagem...">
+            
+            <label for="valorOutro">Valor (R$):</label>
+            <input type="number" id="valorOutro" step="0.01" placeholder="Ex: 15.00">
+            
+            <button type="button" class="btn-outro" onclick="adicionarOutroItem()">+ Adicionar Item Avulso</button>
         </div>
 
         <div class="sessao" style="background-color: #e9ecef;">
@@ -197,65 +300,93 @@
     </div>
 </div>
 
+<div id="modalPrecos" class="modal no-print">
+    <div class="modal-content">
+        <h3 style="margin-top: 0; color: #d9534f; text-align: center;">⚙️ Tabela de Preços Mestre</h3>
+        <p style="font-size: 13px; color: #666; margin-bottom: 15px; text-align: center;">O sistema atualiza sozinho as listas quando você salva.</p>
+        
+        <details>
+            <summary>🍕 Valores das Pizzas</summary>
+            <div style="font-weight:bold; margin-top:5px; color:#555;">Promocionais (01 a 13)</div>
+            <div class="grid-precos">
+                <div><label>Grande:</label><input type="number" id="cfg_prom_g" step="0.50"></div>
+                <div><label>Broto:</label><input type="number" id="cfg_prom_b" step="0.50"></div>
+            </div>
+            
+            <div style="font-weight:bold; margin-top:10px; color:#555;">Tradicionais (14 a 38)</div>
+            <div class="grid-precos">
+                <div><label>Grande:</label><input type="number" id="cfg_trad_g" step="0.50"></div>
+                <div><label>Broto:</label><input type="number" id="cfg_trad_b" step="0.50"></div>
+            </div>
+
+            <div style="font-weight:bold; margin-top:10px; color:#555;">Especiais (39 a 70)</div>
+            <div class="grid-precos">
+                <div><label>Grande:</label><input type="number" id="cfg_esp_g" step="0.50"></div>
+                <div><label>Broto:</label><input type="number" id="cfg_esp_b" step="0.50"></div>
+            </div>
+
+            <div style="font-weight:bold; margin-top:10px; color:#555;">Doces Simples (77 a 83)</div>
+            <div class="grid-precos">
+                <div><label>Grande:</label><input type="number" id="cfg_doceSimp_g" step="0.50"></div>
+                <div><label>Broto:</label><input type="number" id="cfg_doceSimp_b" step="0.50"></div>
+            </div>
+
+            <div style="font-weight:bold; margin-top:10px; color:#555;">Doces Médias</div>
+            <div class="grid-precos">
+                <div><label>Grande:</label><input type="number" id="cfg_doceMed_g" step="0.50"></div>
+                <div><label>Broto:</label><input type="number" id="cfg_doceMed_b" step="0.50"></div>
+            </div>
+
+            <div style="font-weight:bold; margin-top:10px; color:#555;">Doces Premium (Ninho, Trufado)</div>
+            <div class="grid-precos">
+                <div><label>Grande:</label><input type="number" id="cfg_docePrem_g" step="0.50"></div>
+                <div><label>Broto:</label><input type="number" id="cfg_docePrem_b" step="0.50"></div>
+            </div>
+        </details>
+
+        <details>
+            <summary>🧀 Bordas Recheadas</summary>
+            <div id="cfgBordasContainer" class="grid-precos"></div>
+        </details>
+
+        <details>
+            <summary>🥓 Adicionais</summary>
+            <div id="cfgAdicionaisContainer" class="grid-precos"></div>
+        </details>
+
+        <details>
+            <summary>🥤 Bebidas</summary>
+            <div id="cfgBebidasContainer" class="grid-precos"></div>
+        </details>
+
+        <details>
+            <summary>🛵 Taxas de Entrega (Bairros)</summary>
+            <div id="cfgBairrosContainer" class="grid-precos"></div>
+        </details>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="button" class="btn-salvar-modal" onclick="salvarConfiguracoes()">💾 Salvar Tudo</button>
+            <button type="button" class="btn-cancelar-modal" onclick="fecharConfiguracoes()">❌ Cancelar</button>
+        </div>
+    </div>
+</div>
+
 <div class="print-area" id="printArea"></div>
 
 <script>
-    const cardapio = {
-        "01. 2 QUEIJOS": { grande: 35.00, broto: 21.00 }, "02. BACON": { grande: 35.00, broto: 21.00 },
-        "03. CALABRESA": { grande: 35.00, broto: 21.00 }, "04. CALABRESA C/ CHEDDAR": { grande: 35.00, broto: 21.00 },
-        "05. CATUBRESA": { grande: 35.00, broto: 21.00 }, "06. FRANGO": { grande: 35.00, broto: 21.00 },
-        "07. FRANGO C/ CATUPIRY": { grande: 35.00, broto: 21.00 }, "08. FRANGO C/ CHEDDAR": { grande: 35.00, broto: 21.00 },
-        "09. LOMBO": { grande: 35.00, broto: 21.00 }, "10. MILHO": { grande: 35.00, broto: 21.00 },
-        "11. MUÇARELA": { grande: 35.00, broto: 21.00 }, "12. NAPOLITANA": { grande: 35.00, broto: 21.00 },
-        "13. PALMITO": { grande: 35.00, broto: 21.00 }, "14. 3 QUEIJOS": { grande: 37.00, broto: 23.00 },
-        "15. 4 QUEIJOS": { grande: 37.00, broto: 23.00 }, "16. AMERICANA": { grande: 37.00, broto: 23.00 },
-        "17. BACON C/ CATUPIRY": { grande: 37.00, broto: 23.00 }, "18. BACON C/ CHEDDAR": { grande: 37.00, broto: 23.00 },
-        "19. BACON C/ MILHO": { grande: 37.00, broto: 23.00 }, "20. BRASILEIRA": { grande: 37.00, broto: 23.00 },
-        "21. CALABRESA ACEBOLADA": { grande: 37.00, broto: 23.00 }, "22. CALABRESA CROCANTE": { grande: 37.00, broto: 23.00 },
-        "23. CROCANTE": { grande: 37.00, broto: 23.00 }, "24. ESCAROLA C/ BACON": { grande: 37.00, broto: 23.00 },
-        "25. FRAMPALHA": { grande: 37.00, broto: 23.00 }, "26. FRANGALHO": { grande: 37.00, broto: 23.00 },
-        "27. FRANGO C/ MILHO": { grande: 37.00, broto: 23.00 }, "28. GRACIOSA": { grande: 37.00, broto: 23.00 },
-        "29. LOMBO ACEBOLADO": { grande: 37.00, broto: 23.00 }, "30. LOMBO C/ CATUPIRY": { grande: 37.00, broto: 23.00 },
-        "31. LOMBO C/ CHEDDAR": { grande: 37.00, broto: 23.00 }, "32. MARGUERITA": { grande: 37.00, broto: 23.00 },
-        "33. MODA DA CASA": { grande: 37.00, broto: 23.00 }, "34. PAULISTA": { grande: 37.00, broto: 23.00 },
-        "35. PIZZAIOLO": { grande: 37.00, broto: 23.00 }, "36. PORTUGUESA": { grande: 37.00, broto: 23.00 },
-        "37. ROMANA": { grande: 37.00, broto: 23.00 }, "38. VEGETARIANA": { grande: 37.00, broto: 23.00 },
-        "39. 4 ESTAÇÕES": { grande: 44.00, broto: 26.00 }, "40. 5 QUEIJOS": { grande: 44.00, broto: 26.00 },
-        "41. 6 QUEIJOS": { grande: 44.00, broto: 26.00 }, "42. 7 QUEIJOS": { grande: 44.00, broto: 26.00 },
-        "43. ANTONINHO": { grande: 44.00, broto: 26.00 }, "44. BACON AMERICANO": { grande: 44.00, broto: 26.00 },
-        "45. BACON COM BARBECUE": { grande: 44.00, broto: 26.00 }, "46. BAIANA": { grande: 44.00, broto: 26.00 },
-        "47. BOLONHESA": { grande: 44.00, broto: 26.00 }, "48. BRÓCOLIS COM BACON": { grande: 44.00, broto: 26.00 },
-        "49. CAIPIRA": { grande: 44.00, broto: 26.00 }, "50. CALABRESA COM BARBECUE": { grande: 44.00, broto: 26.00 },
-        "51. CANADENSE": { grande: 44.00, broto: 26.00 }, "52. CARBONARA": { grande: 44.00, broto: 26.00 },
-        "53. CATUFRANGO": { grande: 44.00, broto: 26.00 }, "54. CEARENSE": { grande: 44.00, broto: 26.00 },
-        "55. ESTELAR": { grande: 44.00, broto: 26.00 }, "57. ESTROGONOFE DE FRANGO": { grande: 44.00, broto: 26.00 },
-        "58. FRANCESA": { grande: 44.00, broto: 26.00 }, "59. FRANGO COM BARBECUE": { grande: 44.00, broto: 26.00 },
-        "60. GORGONZOLA": { grande: 44.00, broto: 26.00 }, "61. HUMITA": { grande: 44.00, broto: 26.00 },
-        "62. IMPERIAL": { grande: 44.00, broto: 26.00 }, "63. LOMBO COM BARBECUE": { grande: 44.00, broto: 26.00 },
-        "64. MEXICANA": { grande: 44.00, broto: 26.00 }, "65. PARMEGIANA": { grande: 44.00, broto: 26.00 },
-        "66. ROMANESCA": { grande: 44.00, broto: 26.00 }, "67. SICILIANA": { grande: 44.00, broto: 26.00 },
-        "68. SUPER CROCANTE": { grande: 44.00, broto: 26.00 }, "69. SUPREMA": { grande: 44.00, broto: 26.00 },
-        "70. TOSCANA": { grande: 44.00, broto: 26.00 }, "71. ALPINO": { grande: 39.00, broto: 22.00 },
-        "72. BANANA C/ CANELA": { grande: 39.00, broto: 22.00 }, "73. BANANA CROCANTE": { grande: 39.00, broto: 22.00 },
-        "74. BANANA NEVADA": { grande: 39.00, broto: 22.00 }, "75. BANANA NEVADA CROCANTE": { grande: 39.00, broto: 22.00 },
-        "76. BANOFFE": { grande: 39.00, broto: 22.00 }, "77. BEIJINHO": { grande: 36.00, broto: 22.00 },
-        "78. BRIGADEIRO": { grande: 36.00, broto: 22.00 }, "79. CHARGE": { grande: 36.00, broto: 22.00 },
-        "80. CHARGE BRANCO": { grande: 36.00, broto: 22.00 }, "81. CHOCOLATE AO LEITE": { grande: 36.00, broto: 22.00 },
-        "82. CHOCOLATE BRANCO": { grande: 36.00, broto: 22.00 }, "83. CHOCOLATE PRETO": { grande: 36.00, broto: 22.00 },
-        "84. CONFETE C/ CHOCOLATE BRANCO": { grande: 39.00, broto: 22.00 }, "85. CONFETE / CHOCOLATE PRETO": { grande: 39.00, broto: 22.00 },
-        "86. DIAMANTE NEGRO": { grande: 39.00, broto: 22.00 }, "87. DOCE DE LEITE": { grande: 39.00, broto: 22.00 },
-        "88. DOIS AMORES": { grande: 39.00, broto: 22.00 }, "89. FLOCOS": { grande: 39.00, broto: 22.00 },
-        "90. LIMÃO TRUFADO": { grande: 39.00, broto: 22.00 }, "91. LIMÃO": { grande: 39.00, broto: 22.00 },
-        "92. MORANGO": { grande: 39.00, broto: 22.00 }, "93. MORANGUETE": { grande: 39.00, broto: 22.00 },
-        "94. NINHO": { grande: 41.00, broto: 22.00 }, "95. NINHO TRUFADO": { grande: 41.00, broto: 22.00 },
-        "96. PRESTÍGIO": { grande: 39.00, broto: 22.00 }, "97. TRUFADO": { grande: 41.00, broto: 22.00 }
+    // =============================================================
+    // DADOS PADRÃO E CARREGAMENTO DE MEMÓRIA
+    // =============================================================
+    const PADRAO_PRECOS_PIZZAS = {
+        salgadaPromocional: { grande: 35.00, broto: 21.00 }, salgadaTradicional: { grande: 37.00, broto: 23.00 },
+        salgadaEspecial:    { grande: 44.00, broto: 26.00 }, doceSimples:        { grande: 36.00, broto: 22.00 },
+        doceMedia:          { grande: 39.00, broto: 22.00 }, docePremium:        { grande: 41.00, broto: 22.00 }
     };
 
-    const listaBordas = { "Sem borda": 0.00, "Borda Catupiry": 5.00, "Borda Cheddar": 5.00, "Borda Chocolate Preto": 8.00, "Borda Chocolate Branco": 8.00 };
-    const listaAdicionais = { "Sem adicional": 0.00, "Mussarela": 7.00, "Bacon": 5.00, "Calabresa": 5.00, "Frango": 5.00, "Lombo": 5.00, "Palmito": 4.00, "Presunto": 5.00, "Catupiry": 3.00, "Cheddar": 3.00, "Tomate": 3.00, "Cebola": 3.00, "Ovos": 3.00, "Milho": 3.00, "Azeitona": 3.00, "Batata Palha": 3.00 };
-    const listaBebidas = { "Cini Sabores 2L": 8.00, "Sukita 2L": 12.00, "Coca-Cola 2L": 15.00, "Guaraná Antártica 2,25L": 15.00 };
-
-    const listaBairros = {
+    const PADRAO_BORDAS = { "Sem borda": 0.00, "Borda Catupiry": 5.00, "Borda Cheddar": 5.00, "Borda Chocolate Preto": 8.00, "Borda Chocolate Branco": 8.00 };
+    const PADRAO_ADICIONAIS = { "Sem adicional": 0.00, "Mussarela": 7.00, "Bacon": 5.00, "Calabresa": 5.00, "Frango": 5.00, "Lombo": 5.00, "Palmito": 4.00, "Presunto": 5.00, "Catupiry": 3.00, "Cheddar": 3.00, "Tomate": 3.00, "Cebola": 3.00, "Ovos": 3.00, "Milho": 3.00, "Azeitona": 3.00, "Batata Palha": 3.00 };
+    const PADRAO_BEBIDAS = { "Cini Sabores 2L": 8.00, "Sukita 2L": 12.00, "Coca-Cola 2L": 15.00, "Guaraná Antártica 2,25L": 15.00 };
+    const PADRAO_BAIRROS = {
         "Retirada no Balcão": 0.00, "BARIGUI": 5.00, "BATEL": 4.00, "CAIXA DÁGUA": 4.00, "CAMPO DOS CAVALOS": 6.00,
         "CENTRO": 5.00, "GRACIOSA DE BAIXO": 5.00, "GRACIOSA DE CIMA": 5.00, "GUAPÊ": 4.00, "ITAPEMA DE BAIXO": 6.00,
         "JARDIM CAPELISTA": 5.00, "JARDIM MARIA LUIZA": 5.00, "JARDIM RESIDENCIAL II": 5.00, "KM4": 5.00,
@@ -265,48 +396,198 @@
         "TUCUNDUVA": 4.00, "TUCUNDUVA DE BAIXO": 4.00, "TUCUNDUVA DE CIMA": 4.00, "Outro Bairro (Digitar valor)": 0.00
     };
 
+    let PRECOS_PIZZAS = JSON.parse(JSON.stringify(PADRAO_PRECOS_PIZZAS));
+    let listaBordas = JSON.parse(JSON.stringify(PADRAO_BORDAS));
+    let listaAdicionais = JSON.parse(JSON.stringify(PADRAO_ADICIONAIS));
+    let listaBebidas = JSON.parse(JSON.stringify(PADRAO_BEBIDAS));
+    let listaBairros = JSON.parse(JSON.stringify(PADRAO_BAIRROS));
+    let cardapio = {};
+
+    try {
+        if(localStorage.getItem('cfg_pizzas')) PRECOS_PIZZAS = JSON.parse(localStorage.getItem('cfg_pizzas'));
+        if(localStorage.getItem('cfg_bordas')) listaBordas = JSON.parse(localStorage.getItem('cfg_bordas'));
+        if(localStorage.getItem('cfg_adicionais')) listaAdicionais = JSON.parse(localStorage.getItem('cfg_adicionais'));
+        if(localStorage.getItem('cfg_bebidas')) listaBebidas = JSON.parse(localStorage.getItem('cfg_bebidas'));
+        if(localStorage.getItem('cfg_bairros')) listaBairros = JSON.parse(localStorage.getItem('cfg_bairros'));
+    } catch(e) { console.error("Erro ao puxar memória"); }
+
+    function construirCardapio() {
+        cardapio = {
+            "01. 2 QUEIJOS": PRECOS_PIZZAS.salgadaPromocional, "02. BACON": PRECOS_PIZZAS.salgadaPromocional, "03. CALABRESA": PRECOS_PIZZAS.salgadaPromocional, 
+            "04. CALABRESA C/ CHEDDAR": PRECOS_PIZZAS.salgadaPromocional, "05. CATUBRESA": PRECOS_PIZZAS.salgadaPromocional, "06. FRANGO": PRECOS_PIZZAS.salgadaPromocional,
+            "07. FRANGO C/ CATUPIRY": PRECOS_PIZZAS.salgadaPromocional, "08. FRANGO C/ CHEDDAR": PRECOS_PIZZAS.salgadaPromocional, "09. LOMBO": PRECOS_PIZZAS.salgadaPromocional, 
+            "10. MILHO": PRECOS_PIZZAS.salgadaPromocional, "11. MUÇARELA": PRECOS_PIZZAS.salgadaPromocional, "12. NAPOLITANA": PRECOS_PIZZAS.salgadaPromocional, 
+            "13. PALMITO": PRECOS_PIZZAS.salgadaPromocional, 
+            
+            "14. 3 QUEIJOS": PRECOS_PIZZAS.salgadaTradicional, "15. 4 QUEIJOS": PRECOS_PIZZAS.salgadaTradicional, "16. AMERICANA": PRECOS_PIZZAS.salgadaTradicional, 
+            "17. BACON C/ CATUPIRY": PRECOS_PIZZAS.salgadaTradicional, "18. BACON C/ CHEDDAR": PRECOS_PIZZAS.salgadaTradicional, "19. BACON C/ MILHO": PRECOS_PIZZAS.salgadaTradicional, 
+            "20. BRASILEIRA": PRECOS_PIZZAS.salgadaTradicional, "21. CALABRESA ACEBOLADA": PRECOS_PIZZAS.salgadaTradicional, "22. CALABRESA CROCANTE": PRECOS_PIZZAS.salgadaTradicional, 
+            "23. CROCANTE": PRECOS_PIZZAS.salgadaTradicional, "24. ESCAROLA C/ BACON": PRECOS_PIZZAS.salgadaTradicional, "25. FRAMPALHA": PRECOS_PIZZAS.salgadaTradicional, 
+            "26. FRANGALHO": PRECOS_PIZZAS.salgadaTradicional, "27. FRANGO C/ MILHO": PRECOS_PIZZAS.salgadaTradicional, "28. GRACIOSA": PRECOS_PIZZAS.salgadaTradicional, 
+            "29. LOMBO ACEBOLADO": PRECOS_PIZZAS.salgadaTradicional, "30. LOMBO C/ CATUPIRY": PRECOS_PIZZAS.salgadaTradicional, "31. LOMBO C/ CHEDDAR": PRECOS_PIZZAS.salgadaTradicional, 
+            "32. MARGUERITA": PRECOS_PIZZAS.salgadaTradicional, "33. MODA DA CASA": PRECOS_PIZZAS.salgadaTradicional, "34. PAULISTA": PRECOS_PIZZAS.salgadaTradicional, 
+            "35. PIZZAIOLO": PRECOS_PIZZAS.salgadaTradicional, "36. PORTUGUESA": PRECOS_PIZZAS.salgadaTradicional, "37. ROMANA": PRECOS_PIZZAS.salgadaTradicional, 
+            "38. VEGETARIANA": PRECOS_PIZZAS.salgadaTradicional, 
+            
+            "39. 4 ESTAÇÕES": PRECOS_PIZZAS.salgadaEspecial, "40. 5 QUEIJOS": PRECOS_PIZZAS.salgadaEspecial, "41. 6 QUEIJOS": PRECOS_PIZZAS.salgadaEspecial, 
+            "42. 7 QUEIJOS": PRECOS_PIZZAS.salgadaEspecial, "43. ANTONINHO": PRECOS_PIZZAS.salgadaEspecial, "44. BACON AMERICANO": PRECOS_PIZZAS.salgadaEspecial, 
+            "45. BACON COM BARBECUE": PRECOS_PIZZAS.salgadaEspecial, "46. BAIANA": PRECOS_PIZZAS.salgadaEspecial, "47. BOLONHESA": PRECOS_PIZZAS.salgadaEspecial, 
+            "48. BRÓCOLIS COM BACON": PRECOS_PIZZAS.salgadaEspecial, "49. CAIPIRA": PRECOS_PIZZAS.salgadaEspecial, "50. CALABRESA COM BARBECUE": PRECOS_PIZZAS.salgadaEspecial, 
+            "51. CANADENSE": PRECOS_PIZZAS.salgadaEspecial, "52. CARBONARA": PRECOS_PIZZAS.salgadaEspecial, "53. CATUFRANGO": PRECOS_PIZZAS.salgadaEspecial, 
+            "54. CEARENSE": PRECOS_PIZZAS.salgadaEspecial, "55. ESTELAR": PRECOS_PIZZAS.salgadaEspecial, "57. ESTROGONOFE DE FRANGO": PRECOS_PIZZAS.salgadaEspecial, 
+            "58. FRANCESA": PRECOS_PIZZAS.salgadaEspecial, "59. FRANGO COM BARBECUE": PRECOS_PIZZAS.salgadaEspecial, "60. GORGONZOLA": PRECOS_PIZZAS.salgadaEspecial, 
+            "61. HUMITA": PRECOS_PIZZAS.salgadaEspecial, "62. IMPERIAL": PRECOS_PIZZAS.salgadaEspecial, "63. LOMBO COM BARBECUE": PRECOS_PIZZAS.salgadaEspecial, 
+            "64. MEXICANA": PRECOS_PIZZAS.salgadaEspecial, "65. PARMEGIANA": PRECOS_PIZZAS.salgadaEspecial, "66. ROMANESCA": PRECOS_PIZZAS.salgadaEspecial, 
+            "67. SICILIANA": PRECOS_PIZZAS.salgadaEspecial, "68. SUPER CROCANTE": PRECOS_PIZZAS.salgadaEspecial, "69. SUPREMA": PRECOS_PIZZAS.salgadaEspecial, 
+            "70. TOSCANA": PRECOS_PIZZAS.salgadaEspecial, 
+            
+            "71. ALPINO": PRECOS_PIZZAS.doceMedia, "72. BANANA C/ CANELA": PRECOS_PIZZAS.doceMedia, "73. BANANA CROCANTE": PRECOS_PIZZAS.doceMedia, 
+            "74. BANANA NEVADA": PRECOS_PIZZAS.doceMedia, "75. BANANA NEVADA CROCANTE": PRECOS_PIZZAS.doceMedia, "76. BANOFFE": PRECOS_PIZZAS.doceMedia, 
+            "77. BEIJINHO": PRECOS_PIZZAS.doceSimples, "78. BRIGADEIRO": PRECOS_PIZZAS.doceSimples, "79. CHARGE": PRECOS_PIZZAS.doceSimples, 
+            "80. CHARGE BRANCO": PRECOS_PIZZAS.doceSimples, "81. CHOCOLATE AO LEITE": PRECOS_PIZZAS.doceSimples, "82. CHOCOLATE BRANCO": PRECOS_PIZZAS.doceSimples, 
+            "83. CHOCOLATE PRETO": PRECOS_PIZZAS.doceSimples, "84. CONFETE C/ CHOCOLATE BRANCO": PRECOS_PIZZAS.doceMedia, "85. CONFETE / CHOCOLATE PRETO": PRECOS_PIZZAS.doceMedia, 
+            "86. DIAMANTE NEGRO": PRECOS_PIZZAS.doceMedia, "87. DOCE DE LEITE": PRECOS_PIZZAS.doceMedia, "88. DOIS AMORES": PRECOS_PIZZAS.doceMedia, 
+            "89. FLOCOS": PRECOS_PIZZAS.doceMedia, "90. LIMÃO TRUFADO": PRECOS_PIZZAS.doceMedia, "91. LIMÃO": PRECOS_PIZZAS.doceMedia, 
+            "92. MORANGO": PRECOS_PIZZAS.doceMedia, "93. MORANGUETE": PRECOS_PIZZAS.doceMedia, "94. NINHO": PRECOS_PIZZAS.docePremium, 
+            "95. NINHO TRUFADO": PRECOS_PIZZAS.docePremium, "96. PRESTÍGIO": PRECOS_PIZZAS.doceMedia, "97. TRUFADO": PRECOS_PIZZAS.docePremium
+        };
+    }
+    construirCardapio(); 
+
     let carrinhoItens = [];
     let subtotalItens = 0;
     
-    let numeroPedidoAtual = parseInt(localStorage.getItem('numeroPedidoPizzaria')) || 1;
-    let historicoDiario = JSON.parse(localStorage.getItem('historicoPizzaria')) || [];
+    // Lista temporária de múltiplos adicionais da pizza
+    let adicionaisPizzaAtual = [];
+    
+    let numeroPedidoAtual = 1;
+    let historicoDiario = [];
+    
+    try {
+        numeroPedidoAtual = parseInt(localStorage.getItem('numeroPedidoPizzaria')) || 1;
+        historicoDiario = JSON.parse(localStorage.getItem('historicoPizzaria')) || [];
+    } catch(e) {}
 
-    function inicializar() {
-        const selectSabor1 = document.getElementById('sabor1');
-        const selectSabor2 = document.getElementById('sabor2');
-        const selectBorda = document.getElementById('borda');
-        const selectAdicional = document.getElementById('adicional');
-        const selectBebida = document.getElementById('bebida');
-        const selectBairro = document.getElementById('bairro');
+    // =============================================================
+    // MODAL E CONFIGURAÇÕES
+    // =============================================================
+    function renderizarInputsModal(objetoBase, containerId, ignorarChaves) {
+        let container = document.getElementById(containerId);
+        container.innerHTML = "";
+        Object.keys(objetoBase).forEach(key => {
+            if(ignorarChaves.includes(key)) return;
+            let val = objetoBase[key].toFixed(2);
+            container.innerHTML += `<div><label title="${key}">${key}:</label><input type="number" step="0.50" data-chave="${key}" value="${val}"></div>`;
+        });
+    }
 
-        selectSabor1.innerHTML = ""; selectSabor2.innerHTML = '<option value="Nenhum">Nenhum (Pizza inteira do Sabor 1)</option>';
-        selectBorda.innerHTML = ""; selectAdicional.innerHTML = ""; selectBebida.innerHTML = "";
-        selectBairro.innerHTML = '<option value="">Selecione o Bairro...</option>';
+    function lerInputsModal(objetoBase, containerId) {
+        let container = document.getElementById(containerId);
+        let inputs = container.querySelectorAll("input");
+        inputs.forEach(input => {
+            let chave = input.getAttribute("data-chave");
+            let valor = parseFloat(input.value);
+            if(!isNaN(valor)) { objetoBase[chave] = valor; }
+        });
+    }
+
+    function abrirConfiguracoes() {
+        document.getElementById('cfg_prom_g').value = PRECOS_PIZZAS.salgadaPromocional.grande.toFixed(2);
+        document.getElementById('cfg_prom_b').value = PRECOS_PIZZAS.salgadaPromocional.broto.toFixed(2);
+        document.getElementById('cfg_trad_g').value = PRECOS_PIZZAS.salgadaTradicional.grande.toFixed(2);
+        document.getElementById('cfg_trad_b').value = PRECOS_PIZZAS.salgadaTradicional.broto.toFixed(2);
+        document.getElementById('cfg_esp_g').value = PRECOS_PIZZAS.salgadaEspecial.grande.toFixed(2);
+        document.getElementById('cfg_esp_b').value = PRECOS_PIZZAS.salgadaEspecial.broto.toFixed(2);
+        document.getElementById('cfg_doceSimp_g').value = PRECOS_PIZZAS.doceSimples.grande.toFixed(2);
+        document.getElementById('cfg_doceSimp_b').value = PRECOS_PIZZAS.doceSimples.broto.toFixed(2);
+        document.getElementById('cfg_doceMed_g').value = PRECOS_PIZZAS.doceMedia.grande.toFixed(2);
+        document.getElementById('cfg_doceMed_b').value = PRECOS_PIZZAS.doceMedia.broto.toFixed(2);
+        document.getElementById('cfg_docePrem_g').value = PRECOS_PIZZAS.docePremium.grande.toFixed(2);
+        document.getElementById('cfg_docePrem_b').value = PRECOS_PIZZAS.docePremium.broto.toFixed(2);
+
+        renderizarInputsModal(listaBordas, "cfgBordasContainer", ["Sem borda"]);
+        renderizarInputsModal(listaAdicionais, "cfgAdicionaisContainer", ["Sem adicional"]);
+        renderizarInputsModal(listaBebidas, "cfgBebidasContainer", []);
+        renderizarInputsModal(listaBairros, "cfgBairrosContainer", ["Retirada no Balcão", "Outro Bairro (Digitar valor)"]);
+
+        document.getElementById('modalPrecos').style.display = 'block';
+    }
+
+    function fecharConfiguracoes() { document.getElementById('modalPrecos').style.display = 'none'; }
+
+    function salvarConfiguracoes() {
+        PRECOS_PIZZAS.salgadaPromocional.grande = parseFloat(document.getElementById('cfg_prom_g').value) || PRECOS_PIZZAS.salgadaPromocional.grande;
+        PRECOS_PIZZAS.salgadaPromocional.broto = parseFloat(document.getElementById('cfg_prom_b').value) || PRECOS_PIZZAS.salgadaPromocional.broto;
+        PRECOS_PIZZAS.salgadaTradicional.grande = parseFloat(document.getElementById('cfg_trad_g').value) || PRECOS_PIZZAS.salgadaTradicional.grande;
+        PRECOS_PIZZAS.salgadaTradicional.broto = parseFloat(document.getElementById('cfg_trad_b').value) || PRECOS_PIZZAS.salgadaTradicional.broto;
+        PRECOS_PIZZAS.salgadaEspecial.grande = parseFloat(document.getElementById('cfg_esp_g').value) || PRECOS_PIZZAS.salgadaEspecial.grande;
+        PRECOS_PIZZAS.salgadaEspecial.broto = parseFloat(document.getElementById('cfg_esp_b').value) || PRECOS_PIZZAS.salgadaEspecial.broto;
+        PRECOS_PIZZAS.doceSimples.grande = parseFloat(document.getElementById('cfg_doceSimp_g').value) || PRECOS_PIZZAS.doceSimples.grande;
+        PRECOS_PIZZAS.doceSimples.broto = parseFloat(document.getElementById('cfg_doceSimp_b').value) || PRECOS_PIZZAS.doceSimples.broto;
+        PRECOS_PIZZAS.doceMedia.grande = parseFloat(document.getElementById('cfg_doceMed_g').value) || PRECOS_PIZZAS.doceMedia.grande;
+        PRECOS_PIZZAS.doceMedia.broto = parseFloat(document.getElementById('cfg_doceMed_b').value) || PRECOS_PIZZAS.doceMedia.broto;
+        PRECOS_PIZZAS.docePremium.grande = parseFloat(document.getElementById('cfg_docePrem_g').value) || PRECOS_PIZZAS.docePremium.grande;
+        PRECOS_PIZZAS.docePremium.broto = parseFloat(document.getElementById('cfg_docePrem_b').value) || PRECOS_PIZZAS.docePremium.broto;
+
+        lerInputsModal(listaBordas, "cfgBordasContainer");
+        lerInputsModal(listaAdicionais, "cfgAdicionaisContainer");
+        lerInputsModal(listaBebidas, "cfgBebidasContainer");
+        lerInputsModal(listaBairros, "cfgBairrosContainer");
+
+        try {
+            localStorage.setItem('cfg_pizzas', JSON.stringify(PRECOS_PIZZAS));
+            localStorage.setItem('cfg_bordas', JSON.stringify(listaBordas));
+            localStorage.setItem('cfg_adicionais', JSON.stringify(listaAdicionais));
+            localStorage.setItem('cfg_bebidas', JSON.stringify(listaBebidas));
+            localStorage.setItem('cfg_bairros', JSON.stringify(listaBairros));
+        } catch(e) {}
+        
+        construirCardapio();
+        carregarTodasListasNaTela();
+        fecharConfiguracoes();
+        alert("Preços atualizados com sucesso!");
+    }
+
+    // =============================================================
+    // INICIALIZAÇÃO DA TELA
+    // =============================================================
+    function carregarTodasListasNaTela() {
+        const selSabor1 = document.getElementById('sabor1');
+        const selSabor2 = document.getElementById('sabor2');
+        const selBorda = document.getElementById('borda');
+        const selAdic = document.getElementById('adicional');
+        const selBebida = document.getElementById('bebida');
+        const selBairro = document.getElementById('bairro');
+
+        selSabor1.innerHTML = ""; selSabor2.innerHTML = '<option value="Nenhum">Nenhum (Pizza inteira do Sabor 1)</option>';
+        selBorda.innerHTML = ""; selAdic.innerHTML = ""; selBebida.innerHTML = "";
+        selBairro.innerHTML = '<option value="">Selecione o Bairro...</option>';
+
+        Object.keys(cardapio).forEach(sabor => { selSabor1.add(new Option(sabor, sabor)); selSabor2.add(new Option(sabor, sabor)); });
 
         Object.keys(listaBairros).forEach(bairro => {
-            let precoFormatado = listaBairros[bairro] > 0 ? ` (+ R$ ${listaBairros[bairro].toFixed(2).replace('.',',')})` : '';
-            if(bairro === "Retirada no Balcão") precoFormatado = " (Grátis)";
-            selectBairro.add(new Option(bairro + precoFormatado, bairro));
+            let pr = listaBairros[bairro] > 0 ? ` (+ R$ ${listaBairros[bairro].toFixed(2).replace('.',',')})` : '';
+            if(bairro === "Retirada no Balcão") pr = " (Grátis)";
+            selBairro.add(new Option(bairro + pr, bairro));
         });
 
-        Object.keys(cardapio).forEach(sabor => {
-            selectSabor1.add(new Option(sabor, sabor)); selectSabor2.add(new Option(sabor, sabor));
+        Object.keys(listaBordas).forEach(item => {
+            let pr = listaBordas[item] > 0 ? ` (+ R$ ${listaBordas[item].toFixed(2).replace('.',',')})` : '';
+            selBorda.add(new Option(item + pr, item));
         });
 
-        Object.keys(listaBordas).forEach(borda => {
-            let p = listaBordas[borda] > 0 ? ` (+ R$ ${listaBordas[borda].toFixed(2).replace('.',',')})` : '';
-            selectBorda.add(new Option(borda + p, borda));
+        Object.keys(listaAdicionais).forEach(item => {
+            let pr = listaAdicionais[item] > 0 ? ` (+ R$ ${listaAdicionais[item].toFixed(2).replace('.',',')})` : '';
+            selAdic.add(new Option(item + pr, item));
         });
 
-        Object.keys(listaAdicionais).forEach(adc => {
-            let p = listaAdicionais[adc] > 0 ? ` (+ R$ ${listaAdicionais[adc].toFixed(2).replace('.',',')})` : '';
-            selectAdicional.add(new Option(adc + p, adc));
+        Object.keys(listaBebidas).forEach(item => {
+            selBebida.add(new Option(`${item} - R$ ${listaBebidas[item].toFixed(2).replace('.',',')}`, item));
         });
+    }
 
-        Object.keys(listaBebidas).forEach(bebida => {
-            selectBebida.add(new Option(`${bebida} - R$ ${listaBebidas[bebida].toFixed(2).replace('.',',')}`, bebida));
-        });
-
+    function inicializar() {
+        carregarTodasListasNaTela();
         atualizarSabores();
         atualizarCampoTroco();
         document.getElementById('displayNumeroPedido').innerText = numeroPedidoAtual.toString().padStart(4, '0');
@@ -328,12 +609,18 @@
 
     function atualizarSabores() {
         const tamanho = document.getElementById('tamanho').value;
+        const btnAddAdic = document.getElementById('btnAddAdic');
         if (tamanho.includes("Broto")) {
             document.getElementById('sabor2').value = "Nenhum"; document.getElementById('sabor2').disabled = true;
             document.getElementById('borda').value = "Sem borda"; document.getElementById('borda').disabled = true;
             document.getElementById('adicional').value = "Sem adicional"; document.getElementById('adicional').disabled = true;
+            btnAddAdic.disabled = true;
+            
+            adicionaisPizzaAtual = []; // Reseta adicionais múltiplos
+            renderizarAdicionaisTemporarios();
         } else {
             document.getElementById('sabor2').disabled = false; document.getElementById('borda').disabled = false; document.getElementById('adicional').disabled = false;
+            btnAddAdic.disabled = false;
         }
     }
 
@@ -348,18 +635,46 @@
         return sabor.includes('.') ? sabor.split('. ')[1] : sabor;
     }
 
+    // =============================================================
+    // LÓGICA DE MÚLTIPLOS ADICIONAIS NA PIZZA
+    // =============================================================
+    function incluirAdicionalTemporario() {
+        const adicSelect = document.getElementById('adicional').value;
+        if (adicSelect && adicSelect !== "Sem adicional") {
+            adicionaisPizzaAtual.push(adicSelect);
+            renderizarAdicionaisTemporarios();
+        }
+        document.getElementById('adicional').value = "Sem adicional"; // Volta pro padrão
+    }
+
+    function removerAdicionalTemporario(index) {
+        adicionaisPizzaAtual.splice(index, 1);
+        renderizarAdicionaisTemporarios();
+    }
+
+    function renderizarAdicionaisTemporarios() {
+        const box = document.getElementById('boxAdicionaisAtuais');
+        box.innerHTML = "";
+        adicionaisPizzaAtual.forEach((adic, i) => {
+            box.innerHTML += `
+                <div style="display: flex; justify-content: space-between; background: #e9ecef; padding: 6px; margin-top: 5px; border-radius: 3px; font-size: 13px;">
+                    <span>+ ${adic} (R$ ${listaAdicionais[adic].toFixed(2).replace('.',',')})</span>
+                    <span style="color: red; cursor: pointer; font-weight: bold; padding: 0 5px;" onclick="removerAdicionalTemporario(${i})">X</span>
+                </div>
+            `;
+        });
+    }
+
     function adicionarPizza() {
         const tamanho = document.getElementById('tamanho').value;
         const sabor1 = document.getElementById('sabor1').value;
         const sabor2 = document.getElementById('sabor2').value;
         const borda = document.getElementById('borda').value;
-        const adic = document.getElementById('adicional').value;
+        const adicSelectFinal = document.getElementById('adicional').value;
         
         if (!sabor1 || !cardapio[sabor1]) return;
 
-        let preco = 0;
-        let strImpressora = "";
-        let strTela = "";
+        let preco = 0; let strImpressora = ""; let strTela = "";
 
         if (tamanho.includes("Broto")) {
             preco = cardapio[sabor1].broto;
@@ -381,20 +696,35 @@
                 strImpressora += `<div class="sub-item">+ ${borda}</div>`;
                 strTela += `<br><small>+ ${borda}</small>`;
             }
-            if (adic !== "Sem adicional") {
+            
+            // Puxa caso o usuário tenha selecionado na caixa mas esqueceu de apertar o "+"
+            if (adicSelectFinal !== "Sem adicional") {
+                adicionaisPizzaAtual.push(adicSelectFinal);
+            }
+
+            // Loop por todos os adicionais escolhidos
+            adicionaisPizzaAtual.forEach(adic => {
                 preco += listaAdicionais[adic];
                 strImpressora += `<div class="sub-item">+ Adic: ${adic}</div>`;
                 strTela += `<br><small>+ Adic: ${adic}</small>`;
-            }
+            });
         }
 
         carrinhoItens.push({ descTela: strTela, descImpressora: strImpressora, valor: preco });
         subtotalItens += preco;
         renderizarCarrinho(); calcularTotalFinal();
         
-        document.getElementById('sabor2').value = "Nenhum"; document.getElementById('borda').value = "Sem borda"; document.getElementById('adicional').value = "Sem adicional";
+        // Limpa tudo depois de adicionar
+        document.getElementById('sabor2').value = "Nenhum"; 
+        document.getElementById('borda').value = "Sem borda"; 
+        document.getElementById('adicional').value = "Sem adicional";
+        adicionaisPizzaAtual = [];
+        renderizarAdicionaisTemporarios();
     }
 
+    // =============================================================
+    // OUTROS PRODUTOS E CARRINHO
+    // =============================================================
     function adicionarBebida() {
         const bebida = document.getElementById('bebida').value;
         if (!bebida) return;
@@ -402,6 +732,19 @@
         carrinhoItens.push({ descTela: `1x ${bebida}`, descImpressora: `1 ${bebida}`, valor: preco });
         subtotalItens += preco;
         renderizarCarrinho(); calcularTotalFinal();
+    }
+
+    function adicionarOutroItem() {
+        const descOutro = document.getElementById('descOutro').value;
+        const valorTexto = document.getElementById('valorOutro').value;
+        const preco = parseFloat(valorTexto);
+
+        if (!descOutro || isNaN(preco)) { alert("Preencha a descrição e o valor numérico."); return; }
+
+        carrinhoItens.push({ descTela: `1x ${descOutro}`, descImpressora: `1 ${descOutro}`, valor: preco });
+        subtotalItens += preco;
+        renderizarCarrinho(); calcularTotalFinal();
+        document.getElementById('descOutro').value = ""; document.getElementById('valorOutro').value = "";
     }
 
     function removerItem(i) {
@@ -422,7 +765,9 @@
         document.getElementById('valorTotal').value = (subtotalItens + taxa).toFixed(2);
     }
 
-    // IMPRIMIR COMANDA (SALVANDO TAXA SEPARADA)
+    // =============================================================
+    // IMPRESSÃO E RELATÓRIO
+    // =============================================================
     function gerarComanda() {
         const nome = document.getElementById('nome').value;
         const telefone = document.getElementById('telefone').value || 'Não informado';
@@ -439,7 +784,7 @@
         let agora = new Date();
         let dataAtualStr = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
         agora.setHours(agora.getHours() + 1);
-        let entregaAteStr = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+        let entregaAteStr = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
 
         let endFormatado = (bairro === "Retirada no Balcão") ? "RETIRADA NO BALCÃO" : `${endereco || ''} - ${bairro && bairro !== "Outro Bairro (Digitar valor)" ? bairro : ''} - Antonina-PR`;
 
@@ -458,57 +803,57 @@
         let htmlTroco = '';
         if (pagamento === "Dinheiro") {
             if (!isNaN(trocoPara) && trocoPara > total) {
+                const valorTroco = trocoPara - total;
                 htmlTroco = `
-                    <div class="caixa-valores">
-                        <div class="linhas-flex"><span>Dinheiro:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span></div>
-                        <div class="linhas-flex"><span>Levar troco para:</span><span>R$ ${trocoPara.toFixed(2).replace('.', ',')}</span></div>
-                        <div class="linhas-flex" style="font-size: 16px; margin-top: 5px;"><span>Valor do troco:</span><span>R$ ${(trocoPara - total).toFixed(2).replace('.', ',')}</span></div>
-                    </div>
+                    <div class="linhas-flex"><span>Dinheiro:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span></div>
+                    <div class="linhas-flex"><span>Levar troco para:</span><span>R$ ${trocoPara.toFixed(2).replace('.', ',')}</span></div>
+                    <div class="linhas-flex" style="font-size: 16px !important; font-weight: 900 !important; margin-top: 5px;"><span>Valor do troco:</span><span>R$ ${valorTroco.toFixed(2).replace('.', ',')}</span></div>
                 `;
             } else {
-                htmlTroco = `<div class="caixa-valores"><div class="center">Dinheiro (Sem troco)</div></div>`;
+                htmlTroco = `<div class="center">Dinheiro (Sem troco)</div>`;
             }
         } else {
-            htmlTroco = `
-                <div class="caixa-valores">
-                    <div class="linhas-flex"><span>${pagamento}:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span></div>
-                </div>
-            `;
+            htmlTroco = `<div class="linhas-flex"><span>${pagamento}:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span></div>`;
         }
 
         const comandaHTML = `
             <div class="comanda">
-                <div class="titulo-fratelli">FRATELLI DELIVERY</div>
+                <div class="titulo-fratelli">FRATELLI PIZZARIA DELIVERY</div>
+                <div class="cnpj-fratelli">CNPJ: 22.030.378/0001-70</div>
                 
-                <div class="linhas-flex"><span>Pedido: #${numFormatado}</span><span>Entrega: #${numFormatadoCurto}</span></div>
-                <div class="bloco-texto">Empresa: FRATELLI</div>
-                
-                <div class="bloco-texto">Data: ${dataAtualStr}</div>
-                <div class="bloco-texto">Entregar ate: ${entregaAteStr}</div>
-                
-                <div class="bloco-texto" style="margin-top: 10px;">Cliente: ${nome}</div>
-                <div class="bloco-texto">Telefone(s): ${telefone}</div>
-                
-                <div class="separador-pontilhado"></div>
-                
-                <div class="bloco-texto">ENDERECO DE ENTREGA:<br>${endFormatado}</div>
-                
-                <div class="separador-pontilhado"></div>
-                
-                <div class="titulo-secao">ITENS DO PEDIDO</div>
-                <div class="linhas-flex" style="margin-bottom: 8px;"><span>Qtd Item</span><span>Preco</span></div>
-                
-                ${htmlItens}
-                
-                ${obs ? `<div class="bloco-texto" style="margin-top:10px;">OBS: -<br>${obs}</div>` : '<div class="bloco-texto" style="margin-top:10px;">OBS: -</div>'}
-                
-                <div class="caixa-valores">
-                    <div class="linhas-flex"><span>Subtotal:</span><span>R$ ${subtotalItens.toFixed(2).replace('.', ',')}</span></div>
-                    <div class="linhas-flex"><span>Taxa de Entrega:</span><span>R$ ${taxa.toFixed(2).replace('.', ',')}</span></div>
+                <div class="caixa-impressao">
+                    <div class="linhas-flex"><span>Pedido: #${numFormatado}</span><span>Entrega: #${numFormatadoCurto}</span></div>
+                    <div class="bloco-texto">Data: ${dataAtualStr}</div>
+                    <div class="bloco-texto" style="margin-top: 5px;"><strong>Entregar ate: ${entregaAteStr}</strong></div>
                 </div>
                 
-                <div class="caixa-valores" style="font-size: 18px !important; font-weight: 900 !important;">
-                    <div class="linhas-flex"><span>Cobrar do Cliente:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span></div>
+                <div class="caixa-impressao">
+                    <div class="titulo-caixa">DADOS DO CLIENTE</div>
+                    <div class="bloco-texto">Cliente: ${nome}</div>
+                    <div class="bloco-texto">Telefone(s): ${telefone}</div>
+                    <div class="bloco-texto" style="margin-top: 5px;">Endereço de Entrega:<br>${endFormatado}</div>
+                </div>
+                
+                <div class="caixa-impressao">
+                    <div class="titulo-caixa">ITENS DO PEDIDO</div>
+                    <div class="linhas-flex" style="margin-bottom: 5px;"><span>Qtd Item</span><span>Preco</span></div>
+                    ${htmlItens}
+                    <div style="border-top: 1px dashed #000; margin: 8px 0;"></div>
+                    ${obs ? `<div class="bloco-texto">OBS:<br>${obs}</div>` : '<div class="bloco-texto">OBS: Nenhuma</div>'}
+                </div>
+                
+                <div class="caixa-impressao">
+                    <div class="titulo-caixa">RESUMO DOS VALORES</div>
+                    <div class="linhas-flex"><span>Subtotal:</span><span>R$ ${subtotalItens.toFixed(2).replace('.', ',')}</span></div>
+                    <div class="linhas-flex"><span>Taxa de Entrega:</span><span>R$ ${taxa.toFixed(2).replace('.', ',')}</span></div>
+                    <div class="linhas-flex" style="font-size: 18px !important; font-weight: 900 !important; margin-top: 8px;">
+                        <span>TOTAL:</span><span>R$ ${total.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                </div>
+                
+                <div class="caixa-impressao">
+                    <div class="titulo-caixa">FORMA DE PAGAMENTO</div>
+                    ${htmlTroco}
                 </div>
                 
                 <div class="caixa-atencao">
@@ -516,28 +861,27 @@
                     <div>*COBRAR DO CLIENTE R$ ${total.toFixed(2).replace('.', ',')}*</div>
                 </div>
                 
-                <div class="titulo-secao" style="margin-top: 15px;">FORMA DE PAGAMENTO</div>
-                ${htmlTroco}
-                
                 <div class="fim-comanda"></div>
             </div>
         `;
 
         document.getElementById('printArea').innerHTML = comandaHTML;
         
-        // SALVA HISTÓRICO COM A TAXA DE ENTREGA SEPARADA
         const novoPedidoHistorico = {
-            numero: numFormatado,
-            nome: nome,
-            valor: total.toFixed(2),
-            taxa: taxa.toFixed(2), // NOVO CAMPO: Salva a taxa para o motoboy
-            hora: dataAtualStr.split(' ')[1]
+            numero: numFormatado, 
+            nome: nome, 
+            valor: total.toFixed(2), 
+            taxa: taxa.toFixed(2), 
+            hora: dataAtualStr.split(' ')[1],
+            htmlImpressao: comandaHTML
         };
         historicoDiario.unshift(novoPedidoHistorico); 
-        localStorage.setItem('historicoPizzaria', JSON.stringify(historicoDiario));
-
-        numeroPedidoAtual++;
-        localStorage.setItem('numeroPedidoPizzaria', numeroPedidoAtual);
+        
+        try {
+            localStorage.setItem('historicoPizzaria', JSON.stringify(historicoDiario));
+            numeroPedidoAtual++;
+            localStorage.setItem('numeroPedidoPizzaria', numeroPedidoAtual);
+        } catch(e) {}
 
         document.getElementById('displayNumeroPedido').innerText = numeroPedidoAtual.toString().padStart(4, '0');
         renderizarHistorico();
@@ -547,55 +891,52 @@
         setTimeout(() => { limparFormulario(); }, 1000);
     }
 
-    // IMPRIMIR RELATÓRIO (COM ACERTO DO MOTOBOY)
-    function imprimirRelatorio() {
-        if (historicoDiario.length === 0) {
-            alert("Nenhum pedido registrado hoje para imprimir no relatório.");
-            return;
-        }
+    function reimprimirComanda(index) {
+        const pedido = historicoDiario[index];
+        if (!pedido.htmlImpressao) { alert("Comanda antiga, sem dados para reimpressão."); return; }
+        document.getElementById('printArea').innerHTML = pedido.htmlImpressao;
+        window.print();
+    }
 
-        let totalVendas = 0;
-        let totalTaxas = 0; // Somador das taxas do motoboy
-        let htmlPedidos = '';
+    function imprimirRelatorio() {
+        if (historicoDiario.length === 0) { alert("Nenhum pedido registrado hoje."); return; }
+
+        let totalVendas = 0; let totalTaxas = 0; let htmlPedidos = '';
         let historicoCronologico = [...historicoDiario].reverse();
 
         historicoCronologico.forEach(pedido => {
             let valorNum = parseFloat(pedido.valor.replace(',', '.'));
-            let taxaNum = pedido.taxa ? parseFloat(pedido.taxa.replace(',', '.')) : 0; // Puxa a taxa salva
-
-            totalVendas += valorNum;
-            totalTaxas += taxaNum;
-
-            htmlPedidos += `
-                <div class="linhas-flex" style="font-size: 14px !important; margin-bottom: 3px;">
-                    <span>#${pedido.numero} ${pedido.nome.substring(0, 12)}</span>
-                    <span>R$ ${pedido.valor.replace('.', ',')}</span>
-                </div>
-            `;
+            let taxaNum = pedido.taxa ? parseFloat(pedido.taxa.replace(',', '.')) : 0; 
+            totalVendas += valorNum; totalTaxas += taxaNum;
+            htmlPedidos += `<div class="linhas-flex" style="font-size: 13px !important; margin-bottom: 3px;"><span>#${pedido.numero} ${pedido.nome.substring(0, 12)}</span><span>R$ ${pedido.valor.replace('.', ',')}</span></div>`;
         });
 
-        let totalLoja = totalVendas - totalTaxas; // Valor que fica para a pizzaria
+        let totalLoja = totalVendas - totalTaxas; 
         let dataStr = new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
 
         const relatorioHTML = `
             <div class="comanda">
-                <div class="titulo-fratelli">FECHAMENTO CAIXA</div>
+                <div class="titulo-fratelli">FRATELLI PIZZARIA DELIVERY</div>
+                <div class="cnpj-fratelli">CNPJ: 22.030.378/0001-70</div>
+                <div class="titulo-fratelli" style="font-size: 16px !important;">FECHAMENTO CAIXA</div>
                 <div class="bloco-texto center">Data: ${dataStr}</div>
-                <div class="separador-pontilhado"></div>
                 
-                <div class="titulo-secao">RESUMO DE PEDIDOS</div>
-                <div class="linhas-flex" style="margin-bottom: 8px;"><span>Pedido/Cliente</span><span>Valor Total</span></div>
-                ${htmlPedidos}
+                <div class="caixa-impressao" style="margin-top: 10px;">
+                    <div class="titulo-caixa">RESUMO DE PEDIDOS</div>
+                    <div class="linhas-flex" style="margin-bottom: 8px;"><span>Pedido/Cliente</span><span>Valor Total</span></div>
+                    ${htmlPedidos}
+                </div>
                 
-                <div class="separador-pontilhado"></div>
-                
-                <div class="caixa-valores" style="font-size: 16px !important; font-weight: 900 !important;">
+                <div class="caixa-impressao">
+                    <div class="titulo-caixa">FINANCEIRO</div>
                     <div class="linhas-flex"><span>Qtd de Pedidos:</span><span>${historicoDiario.length}</span></div>
-                    <div class="separador-pontilhado" style="margin: 5px 0;"></div>
+                    <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
                     <div class="linhas-flex"><span>Total Produtos:</span><span>R$ ${totalLoja.toFixed(2).replace('.', ',')}</span></div>
                     <div class="linhas-flex"><span>Taxas Motoboy:</span><span>R$ ${totalTaxas.toFixed(2).replace('.', ',')}</span></div>
-                    <div class="separador-pontilhado" style="margin: 5px 0;"></div>
-                    <div class="linhas-flex" style="margin-top: 5px;"><span>TOTAL CAIXA:</span><span>R$ ${totalVendas.toFixed(2).replace('.', ',')}</span></div>
+                    <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+                    <div class="linhas-flex" style="font-size: 16px !important; font-weight: 900 !important; margin-top: 5px;">
+                        <span>TOTAL CAIXA:</span><span>R$ ${totalVendas.toFixed(2).replace('.', ',')}</span>
+                    </div>
                 </div>
                 
                 <div class="center" style="margin-top: 15px;">Fim do Relatorio</div>
@@ -608,7 +949,10 @@
     }
 
     function limparFormulario() {
-        document.getElementById('comandaForm').reset(); carrinhoItens = []; subtotalItens = 0;
+        document.getElementById('comandaForm').reset(); 
+        carrinhoItens = []; subtotalItens = 0;
+        adicionaisPizzaAtual = []; renderizarAdicionaisTemporarios();
+        document.getElementById('descOutro').value = ""; document.getElementById('valorOutro').value = "";
         renderizarCarrinho(); atualizarSabores(); atualizarCampoTroco(); document.getElementById('bairro').selectedIndex = 0;
     }
 
@@ -616,15 +960,25 @@
         const container = document.getElementById('containerHistorico');
         if (historicoDiario.length === 0) { container.innerHTML = '<div style="text-align: center; color: #888; padding: 10px;">Nenhum pedido registrado hoje.</div>'; return; }
         container.innerHTML = "";
-        historicoDiario.forEach(pedido => {
-            container.innerHTML += `<div class="item-historico"><span><strong>#${pedido.numero}</strong> - ${pedido.nome} <span style="color:#888; font-size:11px;">(${pedido.hora})</span></span><span style="font-weight: bold;">R$ ${pedido.valor.replace('.', ',')}</span></div>`;
+        historicoDiario.forEach((pedido, index) => {
+            container.innerHTML += `
+                <div class="item-historico">
+                    <span><strong>#${pedido.numero}</strong> - ${pedido.nome} <span style="color:#888; font-size:11px;">(${pedido.hora})</span></span>
+                    <div class="info-historico">
+                        <span style="font-weight: bold;">R$ ${pedido.valor.replace('.', ',')}</span>
+                        <button type="button" class="btn-reimprimir" onclick="reimprimirComanda(${index})" title="Reimprimir Comanda">🖨️</button>
+                    </div>
+                </div>
+            `;
         });
     }
 
     function zerarExpediente() {
         if(confirm("Encerrar o dia e voltar pedido para #0001? (Certifique-se de imprimir o relatório antes!)")) {
             numeroPedidoAtual = 1; historicoDiario = [];
-            localStorage.setItem('numeroPedidoPizzaria', 1); localStorage.setItem('historicoPizzaria', JSON.stringify([]));
+            try {
+                localStorage.setItem('numeroPedidoPizzaria', 1); localStorage.setItem('historicoPizzaria', JSON.stringify([]));
+            } catch(e) {}
             document.getElementById('displayNumeroPedido').innerText = "0001"; renderizarHistorico();
             alert("Caixa zerado com sucesso!");
         }
