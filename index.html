@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Comandatron - Sistema de Comanda</title>
+
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%231a365d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a4 4 0 1 1 0-8h1"/><circle cx="14" cy="8" r="1.5" fill="%231a365d"/><circle cx="10" cy="12" r="1.5" fill="%231a365d"/><circle cx="14" cy="16" r="1.5" fill="%231a365d"/><line x1="14" y1="8" x2="10" y2="12"/><line x1="10" y1="12" x2="14" y2="16"/></svg>' type="image/svg+xml">
+
 <style>
     /* Estilos da Tela (Visual do PC) */
     body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; padding-bottom: 60px; }
@@ -665,7 +668,7 @@
         document.getElementById('valorTotal').value = (subtotalItens + taxa).toFixed(2);
         
         if (document.getElementById('checkPagamentoMisto').checked) {
-            calcularRestanteMisto(); // Atualiza campo 2 se estiver no misto
+            calcularRestanteMisto(); 
         }
     }
 
@@ -675,13 +678,11 @@
     function editarComanda(index) {
         const pedido = historicoDiario[index];
         
-        // Verifica se a comanda foi salva na versão nova (que guarda os detalhes)
         if (!pedido.dadosCompletos) {
             alert("Esta comanda foi gerada numa versão mais antiga do sistema e não possui os itens salvos para edição. Você só pode editar pedidos feitos a partir de agora.");
             return;
         }
 
-        // Ativa o Modo de Edição
         editandoPedidoIndex = index;
         numeroOriginalEdicao = pedido.numero;
         
@@ -692,14 +693,12 @@
         document.getElementById('subtituloPrincipal').innerText = "Modo de Edição Ativo";
         document.getElementById('btnGerar').innerText = "💾 Salvar Alterações e Imprimir";
 
-        // Preenche os dados do cliente
         document.getElementById('nome').value = pedido.dadosCompletos.cliente.nome;
         document.getElementById('telefone').value = pedido.dadosCompletos.cliente.telefone;
         document.getElementById('bairro').value = pedido.dadosCompletos.cliente.bairro;
         document.getElementById('endereco').value = pedido.dadosCompletos.cliente.endereco;
         document.getElementById('outrosItens').value = pedido.dadosCompletos.observacoes;
         
-        // Preenche carrinho e valores
         carrinhoItens = JSON.parse(JSON.stringify(pedido.dadosCompletos.carrinho));
         subtotalItens = 0;
         carrinhoItens.forEach(item => subtotalItens += item.valor);
@@ -708,7 +707,6 @@
         document.getElementById('taxaEntrega').value = pedido.taxa;
         calcularTotalFinal();
 
-        // Pagamento
         const pagData = pedido.dadosCompletos.pagamento;
         if (pagData.isMisto) {
             document.getElementById('checkPagamentoMisto').checked = true;
@@ -726,7 +724,6 @@
             atualizarCampoTroco();
         }
 
-        // Sobe a tela para o topo
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -766,11 +763,9 @@
 
         let htmlItens = carrinhoItens.map(item => `<div class="item-pedido"><div class="linhas-flex"><span>${item.descImpressora}</span><span>R$ ${item.valor.toFixed(2).replace('.', ',')}</span></div></div>`).join('');
 
-        // Número do Pedido (Novo ou da Edição)
         let numFormatado = (editandoPedidoIndex !== -1) ? numeroOriginalEdicao : numeroPedidoAtual.toString().padStart(4, '0');
         let numFormatadoCurto = parseInt(numFormatado).toString();
 
-        // Lógica de Impressão de Pagamento
         let htmlTroco = '';
         let dadosPagamentoSalvos = {};
 
@@ -787,7 +782,6 @@
             htmlTroco += `<div class="linhas-flex"><span>2. ${p2_tipo}:</span><span>R$ ${p2_val.toFixed(2).replace('.', ',')}</span></div>`;
             
             if ((p1_tipo === "Dinheiro" || p2_tipo === "Dinheiro") && !isNaN(trocoMisto) && trocoMisto > (p1_val + p2_val)) {
-                // Acha quanto da parte misto era dinheiro pra calcular o troco daquela parte
                 let valorEmDinheiro = (p1_tipo === "Dinheiro" ? p1_val : 0) + (p2_tipo === "Dinheiro" ? p2_val : 0);
                 let valorTroco = trocoMisto - valorEmDinheiro;
                 htmlTroco += `
@@ -863,7 +857,6 @@
 
         document.getElementById('printArea').innerHTML = comandaHTML;
         
-        // SALVA TODOS OS DADOS NO HISTÓRICO (Para permitir edição no futuro)
         const novoPedidoHistorico = {
             numero: numFormatado, 
             nome: nome, 
@@ -879,7 +872,6 @@
             }
         };
 
-        // Se for edição, substitui. Se for novo, adiciona no começo.
         if (editandoPedidoIndex !== -1) {
             historicoDiario[editandoPedidoIndex] = novoPedidoHistorico;
         } else {
@@ -892,7 +884,6 @@
             localStorage.setItem('numeroPedidoPizzaria', numeroPedidoAtual);
         } catch(e) {}
 
-        // Tira o modo de edição (se estava ativo)
         cancelarEdicao();
 
         document.getElementById('displayNumeroPedido').innerText = numeroPedidoAtual.toString().padStart(4, '0');
@@ -1031,16 +1022,12 @@
         alert("Preços atualizados com sucesso!");
     }
 
-    // =============================================================
-    // LIMPEZA E RENDERIZAÇÃO DE HISTÓRICO
-    // =============================================================
     function limparFormulario() {
         document.getElementById('comandaForm').reset(); 
         carrinhoItens = []; subtotalItens = 0;
         adicionaisPizzaAtual = []; renderizarAdicionaisTemporarios();
         document.getElementById('descOutro').value = ""; document.getElementById('valorOutro').value = "";
         
-        // Resetar área de pagamento misto
         document.getElementById('checkPagamentoMisto').checked = false;
         togglePagamentoMisto();
 
